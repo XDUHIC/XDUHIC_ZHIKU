@@ -1,0 +1,826 @@
+/**
+ * 黑暗模式样式代码
+ * 包含 4 种不同的卡片交互风格
+ */
+
+// =============================================================================
+// 核心变量定义
+// =============================================================================
+
+// --- 品牌色 ---
+$primary-color: #FF4B58;
+
+// --- 背景色系 ---
+$bg-dark-base: #121212; // 页面最底层背景
+$bg-dark-surface: #1e1e1e; // 通用容器
+$bg-dark-card: #1b1c21; // 卡片基础色
+$bg-dark-input: #262626; // 输入框
+$bg-dark-hover: #2d2d2d; // 悬浮态
+$bg-dark-section: #15151a; // 深色区块
+
+// --- 边框色系 ---
+$border-color-base: #333333;
+$border-color-light: #444444;
+
+// --- 文字色系 ---
+$text-color-primary: #f1ecec;
+$text-color-secondary: #FEF2DF;
+$text-color-tertiary: #d7d1d1;
+$text-role-muted: #e5c6ac;
+$text-code: #9696cb;
+
+// --- 特殊场景补充变量,暗黑模式细节 ---
+$markdown-code-bg: rgba(255, 255, 255, 0.08);
+$markdown-pre-bg: #171a22;
+$markdown-table-stripe: #20242d;
+
+// =============================================================================
+// 卡片样式
+// =============================================================================
+
+// 基础卡片结构 (所有卡片通用)
+@mixin card-base {
+  background-color: $bg-dark-card !important;
+  color: $text-color-primary !important;
+  position: relative;
+  overflow: hidden; // 用于裁剪伪元素溢出
+  z-index: 1;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); // 丝滑过渡
+}
+
+// 流光角标
+@mixin card-style-neon {
+  @include card-base;
+  border: 1px solid $border-color-base !important;
+
+  &:hover {
+    border-color: $primary-color !important;
+    // 四角光效：左上 & 右下
+    box-shadow: -2px -2px 0 rgba($primary-color, 0.8),
+    2px 2px 0 rgba($primary-color, 0.8),
+    0 0 12px rgba($primary-color, 0.3) !important;
+    animation: neon-pulse 1.5s infinite ease-in-out;
+  }
+}
+
+// 微光呼吸动画
+@keyframes neon-pulse {
+  0% {
+    box-shadow: -2px -2px 0 rgba($primary-color, 0.8), 2px 2px 0 rgba($primary-color, 0.8), 0 0 12px rgba($primary-color, 0.3);
+  }
+  50% {
+    box-shadow: -2px -2px 0 rgba($primary-color, 0.6), 2px 2px 0 rgba($primary-color, 0.6), 0 0 20px rgba($primary-color, 0.5);
+  }
+  100% {
+    box-shadow: -2px -2px 0 rgba($primary-color, 0.8), 2px 2px 0 rgba($primary-color, 0.8), 0 0 12px rgba($primary-color, 0.3);
+  }
+}
+
+@keyframes title-radiate-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+    letter-spacing: 0.4rem;
+    text-shadow: 0 0 0 rgba($primary-color, 0);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.08);
+    letter-spacing: 0.16rem;
+    text-shadow: 0 0 30px rgba($primary-color, 0.55);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1.08);
+    letter-spacing: 0.14rem;
+    text-shadow: 0 0 24px rgba($primary-color, 0.45);
+  }
+}
+
+
+// 极光晕影
+@mixin card-style-tech {
+  @include card-base;
+  border: 1px solid $border-color-base !important;
+
+  &:hover {
+    border-color: transparent !important; // 边框隐去，让阴影成为视觉边框
+    box-shadow: 0 0 12px rgba(64, 201, 255, 0.4), // 青
+    0 0 24px rgba(128, 0, 255, 0.25), // 紫
+    0 0 36px rgba(255, 64, 128, 0.15) !important; // 品红
+    transition: box-shadow 0.4s ease, border-color 0.2s ease;
+  }
+}
+
+// 风格 C: 悬停时底部滑出一道亮线 - 适用于 [首页特性/公告]
+@mixin card-style-line {
+  @include card-base;
+  border: 1px solid $border-color-base !important;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0%; // 默认宽度为0
+    height: 3px; // 线条高度
+    background-color: $primary-color;
+    transition: width 0.3s ease;
+  }
+
+  &:hover {
+    border-color: $border-color-light !important;
+    background-color: lighten($bg-dark-card, 3%) !important; // 稍微变亮
+
+    // 线条伸展
+    &::after {
+      width: 100%;
+    }
+  }
+}
+
+// 风格 D 晶格点阵
+@mixin card-style-focus {
+  @include card-base;
+  border: 1px solid $border-color-base !important;
+
+  &:hover {
+    border: 1px dotted rgba(255, 255, 255, 0.7) !important;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05),
+    0 0 16px rgba(255, 255, 255, 0.15) !important;
+    // 保持背景色完全不变，仅边框与阴影
+  }
+}
+
+// =============================================================================
+// 根样式与全局重置
+// =============================================================================
+
+html.dark {
+  /* 基础背景与文字 */
+  background-color: $bg-dark-base !important;
+  color: $text-code !important;
+  color-scheme: dark;
+
+  body {
+    background-color: $bg-dark-base !important;
+    color: #e5e7eb !important;
+  }
+
+  /* 覆盖 Tailwind/Bootstrap 背景 */
+  .bg-white, .bg-slate-50, .bg-gray-50, .bg-slate-100 {
+    background-color: $bg-dark-surface !important;
+  }
+
+  /* 按钮修正 */
+  .el-button:not(.el-button--primary) {
+    background-color: $bg-dark-hover !important;
+    border-color: $border-color-light !important;
+    color: #e5e7eb !important;
+  }
+
+  // ===========================================================================
+  // 布局组件
+  // ===========================================================================
+
+  .header {
+    background-color: #1a1a1a !important;
+    border-bottom: 1px solid $border-color-base !important;
+
+    .nav-link {
+      color: $text-color-primary !important;
+
+      &:hover, &.active {
+        color: $primary-color !important;
+      }
+    }
+
+    .logo-text {
+      color: $primary-color !important;
+    }
+
+    .theme-btn {
+      color: #cbd5e1 !important;
+
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+      }
+    }
+  }
+
+  /* 页面顶部标题区域：复用 pages.scss 的基础结构，仅覆盖暗色必要样式 */
+  .page-header {
+    background: linear-gradient(180deg, $bg-dark-card 0%, $bg-dark-base 100%);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+
+    &::before {
+      background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      background-size: 30px 30px;
+      background-position: center top;
+    }
+
+    &::after {
+      background: radial-gradient(
+                      380px 220px at var(--header-glow-x) var(--header-glow-y),
+                      rgba($primary-color, 0.14) 0%,
+                      rgba($primary-color, 0.08) 32%,
+                      rgba($primary-color, 0.03) 56%,
+                      transparent 72%
+      );
+      filter: blur(16px);
+    }
+
+    .page-title {
+      color: #ffffff !important;
+      letter-spacing: 0.12rem;
+      text-shadow: 0 0 20px rgba($primary-color, 0.35);
+      animation: title-radiate-in 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .page-description, .page-subtitle, p {
+      color: $text-color-secondary !important;
+      font-size: 1.05rem;
+      max-width: 700px;
+      margin: 0 auto;
+      opacity: 0.9;
+    }
+
+    h1, h2, h3, h4, span, div {
+      background: none !important;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .page-header {
+      .page-title {
+        animation: none;
+      }
+    }
+  }
+
+  // 公告、事件页面顶部标题区域
+  .announcement-detail-page, .event-detail-page {
+    .page-header {
+      background: linear-gradient(135deg, #8e9e9f 0%, #77809d 50%, #776a8f 100%);
+    }
+  }
+
+  // 项目详情页面顶部标题区域
+  .project-detail-page{
+    .project-header{
+      background: linear-gradient(180deg, $bg-dark-card 0%, $bg-dark-base 100%);
+      .project-description {
+        color: $text-color-secondary;
+      }
+    }
+  }
+
+  // ===========================================================================
+  // 通用 UI (Search, Filter)
+  // ===========================================================================
+
+  .search-container, .search-bar, .search-group {
+    /*background-color: $bg-dark-input !important;*/
+    /*border: 1px solid $border-color-light !important;*/
+    input {
+      background-color: transparent !important;
+      color: #e5e7eb !important;
+    }
+
+    .search-label {
+      color: $text-color-tertiary;
+    }
+  }
+
+  .filter-section, .category-nav, .knowledge-header {
+    background-color: $bg-dark-surface !important;
+    border-color: $border-color-base !important;
+
+    .search-box {
+      .search-label {
+        color: $text-color-tertiary;
+      }
+    }
+  }
+
+  .filters-section .filter-group .filter-label {
+    color: $text-color-tertiary;
+  }
+
+  .filter-label {
+    color: $text-color-tertiary;
+    font-size: 14px;
+  }
+
+  h2, h3 {
+    color: $text-color-secondary !important;
+  }
+
+  // ===========================================================================
+  // 模块化卡片样式应用
+  // ===========================================================================
+
+  /* 首页特性/公告 */
+  .home-page {
+    .feature-card, .announcement-card, .event-card {
+      @include card-style-line; // <--- 应用样式 C
+
+      .feature-description, .announcement-excerpt, .event-description,
+      .announcement-date, .announcement-views, .event-info {
+        color: $text-color-tertiary;
+      }
+
+      .feature-icon, .feature-link, .announcement-link, .event-link {
+        color: $primary-color;
+      }
+    }
+  }
+
+  /* 知识库 */
+  .resource-card {
+    @include card-style-tech; // <--- 应用样式 B
+
+    .resource-content {
+      .resource-description {
+        color: $text-color-tertiary;
+      }
+    }
+
+    // 覆盖原有的阴影颜色以适应新效果
+    &:hover {
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
+    }
+  }
+
+  /* 项目/竞赛 */
+  .project-card,
+  .competition-card {
+    @include card-style-neon; // <--- 应用样式 A
+
+    .project-description {
+      color: $text-color-tertiary;
+    }
+
+    .project-meta span {
+      color: $text-color-tertiary !important;
+    }
+  }
+
+  /* 项目页面的贡献部分 */
+  .projects-page {
+    .contribute-section {
+      background: $bg-dark-section;
+
+      .container .contribute-card {
+        @include card-style-neon; // 这里也用霓虹效果，强调"参与"
+        .contribute-content .contribute-text .contribute-description {
+          color: $text-role-muted;
+        }
+      }
+    }
+
+    .projects-count {
+      color: $text-role-muted;
+
+      .count {
+        color: $text-color-tertiary;
+      }
+    }
+  }
+
+  /* 实用工具 */
+  .tool-card {
+    @include card-style-focus; // <--- 应用样式 D
+
+    .tool-description, .tool-views {
+      color: $text-color-tertiary;
+    }
+  }
+
+  /* --- 其他页面 --- */
+  .articles-page {
+    background-color: $bg-dark-base;
+  }
+
+  .article-card, .resource-item, .sidebar-box, .subscription-card {
+    background-color: $bg-dark-surface !important;
+    border-color: $border-color-base !important;
+    color: #e5e7eb !important;
+  }
+
+  .shares-page {
+    background-color: $bg-dark-base;
+
+    .contributors-section {
+      background: $bg-dark-base;
+
+      .contributor-card {
+        @include card-style-focus; // 头像卡片适合用聚焦效果
+        .contributor-position, .contributor-company {
+          color: $text-color-tertiary;
+        }
+      }
+    }
+
+    .shares-section .container .empty-container {
+      color: $text-role-muted;
+    }
+
+    .filter-section .filters {
+      background-color: $bg-dark-base;
+    }
+
+    .contribute-section {
+      background: $bg-dark-section;
+
+      .contribute-card {
+        @include card-style-neon;
+
+        .contribute-description {
+          color: $text-color-tertiary;
+        }
+      }
+    }
+  }
+
+
+  /* 详情页与内容文档区域 */
+  .announcement-detail-page,
+  .project-detail-page,
+  .share-detail-page,
+  .event-detail-page, {
+    background-color: $bg-dark-base !important;
+
+    .content-container,
+    .document-content {
+      background-color: $bg-dark-surface !important;
+      border: 1px solid $border-color-base !important;
+      color: $text-color-primary !important;
+    }
+
+    .page-meta,
+    .meta-item,
+    .empty,
+    .loading {
+      color: $text-color-tertiary !important;
+    }
+  }
+
+  /* Markdown 全局暗色覆盖：统一替换默认背景、字体 */
+  .markdown-content,
+  .markdown-body,
+  .v-md-editor-preview {
+    color: $text-color-primary !important;
+
+    h1, h2, h3, h4, h5, h6,
+    p, li, span, strong, em,
+    td, th, blockquote {
+      color: $text-color-primary !important;
+    }
+
+    h1, h2 {
+      border-bottom-color: $border-color-base !important;
+    }
+
+    h6,
+    blockquote,
+    .meta,
+    .description {
+      color: $text-color-tertiary !important;
+    }
+
+    blockquote {
+      border-left-color: $border-color-light !important;
+      background: $markdown-pre-bg !important;
+    }
+
+    code {
+      color: $text-code !important;
+      background: $markdown-code-bg !important;
+    }
+
+    pre,
+    pre[class*='language-'] {
+      background: $markdown-pre-bg !important;
+      border: 1px solid $border-color-base !important;
+
+      code {
+        color: $text-color-primary !important;
+        background: transparent !important;
+      }
+    }
+
+    table tr {
+      background: $bg-dark-surface !important;
+      border-top-color: $border-color-base !important;
+    }
+
+    table tr:nth-child(2n) {
+      background: $markdown-table-stripe !important;
+    }
+
+    table th,
+    table td {
+      border-color: $border-color-base !important;
+    }
+
+    hr {
+      background: $border-color-base !important;
+    }
+
+    a {
+      color: $primary-color !important;
+    }
+  }
+
+  /* 页面容器与列表页 */
+  .announcements-page,
+  .events-page,
+  .competitions-page,
+  .tools-page,
+  .knowledge-page,
+  .about-page,
+  .favorites-page,
+  .profile-wrapper,
+  .project-repository {
+    background-color: $bg-dark-base !important;
+    color: $text-color-primary !important;
+
+    .content-container .filters-section {
+      background: $bg-dark-section
+    }
+  }
+
+  .favorites-content,
+  .stats-card,
+  .favorite-card,
+  .user-card,
+  .profile-card,
+  .edit-form-card,
+  .security-card,
+  .mission-card,
+  .value-item,
+  .timeline-item,
+  .event-card,
+  .announcement-card {
+    background-color: $bg-dark-surface !important;
+    border-color: $border-color-base !important;
+    color: $text-color-primary !important;
+  }
+
+  .page-subtitle,
+  .section-subtitle,
+  .section-description,
+  .card-time,
+  .empty-description,
+  .meta-text,
+  .intro-paragraph,
+  .mission-text,
+  .value-description {
+    color: $text-color-tertiary !important;
+  }
+
+  /* 登录/注册页 */
+  .auth-wrapper {
+    .form-section {
+      background: $bg-dark-base !important;
+    }
+
+    .auth-card {
+      background: $bg-dark-surface !important;
+      border: 1px solid $border-color-base !important;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45) !important;
+    }
+
+    .title,
+    .subtitle,
+    .footer-text,
+    .el-form-item__label {
+      color: $text-color-primary !important;
+    }
+
+    .footer-link {
+      color: $primary-color !important;
+    }
+  }
+
+  /* 个人中心 */
+  .profile-wrapper {
+    background: linear-gradient(145deg, #11131a 0%, #1a1f2b 45%, #161924 100%) !important;
+
+    .bg-decoration .wave {
+      opacity: 0.25;
+      filter: saturate(0.7);
+    }
+
+    .top-nav .page-title,
+    .top-nav .back-btn,
+    .display-name,
+    .card-title,
+    .section-title {
+      color: $text-color-primary !important;
+    }
+
+    .username,
+    .stat-label,
+    .card-subtitle {
+      color: $text-color-tertiary !important;
+    }
+
+    .user-info-card,
+    .edit-form-card {
+      background: rgba(27, 28, 33, 0.92) !important;
+      border: 1px solid $border-color-base !important;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45) !important;
+      backdrop-filter: blur(6px);
+    }
+
+    .card-header {
+      border-bottom-color: $border-color-base !important;
+    }
+
+    .avatar-container .avatar {
+      border-color: $border-color-light !important;
+    }
+
+    .quick-actions .action-buttons .action-btn {
+      background: $bg-dark-input !important;
+      border-color: $border-color-base !important;
+      color: $text-color-primary !important;
+    }
+
+    .el-form-item__label,
+    .el-input__inner,
+    .el-textarea__inner,
+    .el-select__placeholder {
+      color: $text-color-primary !important;
+    }
+
+    .el-input__wrapper,
+    .el-textarea__inner,
+    .el-select__wrapper {
+      background: $bg-dark-input !important;
+      border-color: $border-color-base !important;
+      box-shadow: none !important;
+    }
+  }
+
+  /* 项目仓库页 */
+  .project-repository {
+    .github-header {
+      background: linear-gradient(135deg, #1b2230 0%, #202938 100%) !important;
+      border-bottom: 1px solid $border-color-base !important;
+
+      .username,
+      .stat-number {
+        color: $text-color-primary !important;
+      }
+
+      .user-bio,
+      .stat-label {
+        color: $text-color-tertiary !important;
+      }
+    }
+
+    .github-nav {
+      background: $bg-dark-surface !important;
+      border-bottom: 1px solid $border-color-base !important;
+
+      .nav-tab {
+        color: $text-color-tertiary !important;
+
+        &.active {
+          color: $text-color-primary !important;
+          border-bottom-color: $primary-color !important;
+        }
+
+        .tab-count {
+          background: $bg-dark-hover !important;
+          color: $text-color-primary !important;
+        }
+      }
+    }
+
+    .main-content {
+      background: $bg-dark-base !important;
+    }
+
+    .repo-item,
+    .starred-item,
+    .repo-list,
+    .starred-list,
+    .empty-state,
+    .repo-search,
+    .starred-search {
+      background: $bg-dark-surface !important;
+      border-color: $border-color-base !important;
+      color: $text-color-primary !important;
+    }
+
+    .repo-name,
+    .starred-title,
+    .author-name {
+      color: $text-color-primary !important;
+    }
+
+    .repo-description,
+    .starred-description,
+    .repo-updated,
+    .starred-date,
+    .repo-separator,
+    .empty-description,
+    .repo-visibility,
+    .starred-visibility {
+      color: $text-color-tertiary !important;
+    }
+
+    .repo-stats .stat-item,
+    .starred-stats .stat-item,
+    .empty-title,
+    .empty-icon {
+      color: $text-color-primary !important;
+    }
+  }
+
+  /* Tailwind 页面（上传/编辑）暗色化补全 */
+  .min-h-screen.bg-gray-50,
+  .min-h-screen[class*='bg-gray-'] {
+    background-color: $bg-dark-base !important;
+    color: $text-color-primary !important;
+  }
+
+  .border-gray-200,
+  .border-gray-300,
+  .border-gray-400 {
+    border-color: $border-color-light !important;
+  }
+
+  .text-gray-900,
+  .text-gray-700 {
+    color: $text-color-primary !important;
+  }
+
+  .text-gray-600,
+  .text-gray-500,
+  .text-gray-400 {
+    color: $text-color-tertiary !important;
+  }
+
+  .hover\:bg-gray-50:hover,
+  .hover\:border-gray-400:hover {
+    background-color: $bg-dark-hover !important;
+    border-color: $border-color-light !important;
+  }
+
+  .focus\:ring-offset-2:focus {
+    --tw-ring-offset-color: $bg-dark-surface !important;
+  }
+
+  /* 上传输入框 */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="url"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="file"],
+  textarea,
+  select {
+    background-color: $bg-dark-input;
+    color: $text-color-tertiary;
+    border-color: $text-role-muted;
+  }
+
+  /*input[type="text"]:focus,
+  input[type="email"]:focus,
+  input[type="password"]:focus,
+  input[type="url"]:focus,
+  input[type="search"]:focus,
+  input[type="tel"]:focus,
+  input[type="number"]:focus,
+  input[type="file"]:focus,
+  textarea:focus,
+  select:focus {
+    background-color: $bg-dark-section;
+    color: $text-color-secondary;
+  }*/
+
+  /* 下拉选择框 */
+  select option {
+    background-color: $bg-dark-surface;
+    color: $text-color-secondary;
+  }
+}
+
+
+// =============================================================================
+// 动画过渡
+// =============================================================================
+
+* {
+  // 增加 transform 过渡，卡片上浮效果
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+}

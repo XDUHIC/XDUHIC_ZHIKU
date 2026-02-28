@@ -1,0 +1,31 @@
+# ========================
+# 1. 前端 - 不上传
+# ========================
+fronted/node_modules/
+fronted/dist/
+fronted/npm-debug.log*
+fronted/yarn-debug.log*
+fronted/yarn-error.log*
+fronted/.idea/
+fronted/.vscode/
+*.DS_Store
+
+# ========================
+# 2. 后端 - 不上传
+# ========================
+backend/target/
+backend/.mvn/wrapper/maven-wrapper.jar
+backend/**/*.class
+backend/.idea/
+backend/*.iml
+backend/.vscode/
+backend/logs/
+
+# ========================
+# 3. 全局设置
+# ========================
+.idea/
+.vscode/
+*.log
+
+/flag.txt

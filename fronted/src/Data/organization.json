@@ -1,0 +1,538 @@
+{
+  "company": "西电华为俱乐部",
+  "lastUpdated": "2026-02-22",
+  "organization": {
+    "id": "root",
+    "name": "NAME",
+    "type": "company",
+    "email": "EMAIL",
+    "children": [
+
+      {
+        "id": "dept-001",
+        "name": "NAME",
+        "type": "department",
+        "totalMembers": 213,
+        "children": [
+          {
+            "id": "dept-001-001",
+            "name": "NAME",
+            "type": "team",
+            "totalMembers":90,
+            "leader": [
+              {
+                "id": "emp-001-001",
+                "name": "NAME",
+                "position": "POSITION",
+                "email": "EMAIL"
+              }
+            ],
+
+            "children": [
+              {
+                "id": "dept-001-001-001",
+                "name": "NAME",
+                "members": [
+                  {
+                    "id": "emp-001-001-001-001",
+                    "name": "NAME",
+                    "position": "POSITION",
+                    "email": "EMAIL"
+                  },
+                  {
+                    "id": "emp-001-001-001-002",
+                    "name": "NAME",
+                    "position": "POSITION",
+                    "email": "EMAIL"
+                  },
+                  {
+                    "id": "emp-001-001-001-003",
+                    "name": "NAME",
+                    "position": "POSITION",
+                    "email": "EMAIL"
+                  },
+                  {
+                    "id": "emp-001-001-001-004",
+                    "name": "NAME",
+                    "position": "POSITION",
+                    "email": "EMAIL"
+                  }
+                ]
+              },
+              {
+                "id": "dept-001-001-002",
+                "name": "NAME",
+                "members": [
+                  {
+                    "id": "emp-001-001-002-001",
+                    "name": "NAME",
+                    "position": "POSITION",
+                    "email": "EMAIL"
+                  },
+                  {
+                    "id": "emp-001-001-002-002",
+                    "name": "NAME",
+                    "position": "POSITION",
+                    "email": "EMAIL"
+                  },
+                  {
+                    "id": "emp-001-001-002-003",
+                    "name": "NAME",
+                    "position": "POSITION",
+                    "email": "EMAIL"
+                  },
+                  {
+                    "id": "emp-001-001-002-004",
+                    "name": "NAME",
+                    "position": "POSITION",
+                    "email": "EMAIL"
+                  }
+                ]
+              },
+              {
+                "id": "dept-001-001-003",
+                "name": "NAME",
+                "members": [
+                  {
+                    "id": "emp-001-001-003-001",
+                    "name": "NAME",
+                    "position": "POSITION",
+                    "email": "EMAIL"
+                  },
+                  {
+                    "id": "emp-001-001-003-002",
+                    "name": "NAME",
+                    "position": "POSITION",
+                    "email": "EMAIL"
+                  },
+                  {
+                    "id": "emp-001-001-003-003",
+                    "name": "NAME",
+                    "position": "POSITION",
+                    "email": "EMAIL"
+                  },
+                  {
+                    "id": "emp-001-001-003-004",
+                    "name": "NAME",
+                    "position": "POSITION",
+                    "email": ""
+                  }
+                ]
+              }
+            ]
+
+          },
+          {
+            "id": "dept-001-002",
+            "name": "NAME",
+            "type": "team",
+            "totalMembers": 125,
+            "leader": [
+              {
+                "id": "emp-001-002",
+                "name": "NAME",
+                "position": "POSITION",
+                "email": ""
+              }
+            ],
+            "children": [
+              {
+                "id": "dept-001-002-001",
+                "name": "NAME",
+                "members": [
+                  {
+                    "id": "emp-001-002-001-001",
+                    "name": "NAME",
+                    "position": "POSITION",
+                    "email": "EMAIL"
+                  },
+                  {
+                    "id": "emp-001-002-001-002",
+                    "name": "NAME",
+                    "position": "POSITION",
+                    "email": ""
+                  },
+                  {
+                    "id": "emp-001-002-001-003",
+                    "name": "NAME",
+                    "position": "POSITION",
+                    "email": "EMAIL"
+                  }
+                ]
+              },
+              {
+                "id": "dept-001-002-002",
+                "name": "NAME",
+                "members": [
+                  {
+                    "id": "emp-001-002-002-001",
+                    "name": "NAME",
+                    "position": "POSITION",
+                    "email": "EMAIL"
+                  },
+                  {
+                    "id": "emp-001-002-002-002",
+                    "name": "NAME",
+                    "position": "POSITION",
+                    "email": "EMAIL"
+                  },
+                  {
+                    "id": "emp-001-002-002-003",
+                    "name": "NAME",
+                    "position": "POSITION",
+                    "email": "EMAIL"
+                  }
+                ]
+              },
+              {
+                "id": "dept-001-002-003",
+                "name": "NAME",
+                "members": [
+                  {
+                    "id": "emp-001-002-003-001",
+                    "name": "NAME",
+                    "position": "POSITION",
+                    "email": "EMAIL"
+                  },
+                  {
+                    "id": "emp-001-002-003-002",
+                    "name": "NAME",
+                    "position": "POSITION",
+                    "email": ""
+                  }
+                ]
+              },
+              {
+                "id": "dept-001-002-004",
+                "name": "NAME",
+                "members": [
+                  {
+                    "id": "emp-001-002-004-001",
+                    "name": "NAME",
+                    "position": "POSITION",
+                    "email": "EMAIL"
+                  },
+                  {
+                    "id": "emp-001-002-004-002",
+                    "name": "NAME",
+                    "position": "POSITION",
+                    "email": "EMAIL"
+                  },
+                  {
+                    "id": "emp-001-002-004-003",
+                    "name": "NAME",
+                    "position": "POSITION",
+                    "email": "EMAIL"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "dept-001-003",
+            "name": "NAME",
+            "type": "team",
+            "totalMembers": 12,
+            "leader": {
+              "id": "emp-001-003",
+              "name": "NAME"
+            },
+            "children": []
+          }
+        ]
+
+
+      },
+
+      {
+        "id": "dept-002",
+        "name": "NAME",
+        "type": "department",
+        "totalMembers": 55,
+        "children": [
+          {
+            "id": "dept-002-001",
+            "name": "NAME",
+            "type": "team",
+            "totalMembers": 15,
+            "leader":[
+              {
+                "id": "emp-002-001-001",
+                "name": "NAME",
+                "position": "POSITION",
+                "email": "EMAIL"
+              },
+              {
+                "id": "emp-002-001-002",
+                "name": "NAME",
+                "position": "POSITION",
+                "email": ""
+              }
+            ],
+
+
+
+            "children": [
+              {
+                "id": "dept-002-001-001",
+                "name": "NAME",
+                "members": [
+                  {
+                    "id": "emp-002-001-001-001",
+                    "name": "NAME",
+                    "position": "POSITION",
+                    "email": "EMAIL"
+                  },
+                  {
+                    "id": "emp-002-001-001-002",
+                    "name": "NAME",
+                    "position": "POSITION",
+                    "email": ""
+                  }
+                ]
+              },
+              {
+                "id": "dept-002-001-002",
+                "name": "NAME",
+                "members": [
+                  {
+                    "id": "emp-002-001-002-001",
+                    "name": "NAME",
+                    "position": "POSITION",
+                    "email": "EMAIL"
+                  },
+                  {
+                    "id": "emp-002-001-002-002",
+                    "name": "NAME",
+                    "position": "POSITION",
+                    "email": "EMAIL"
+                  },
+                  {
+                    "id": "emp-002-001-002-003",
+                    "name": "NAME",
+                    "position": "POSITION",
+                    "email": ""
+                  },
+                  {
+                    "id": "emp-002-001-002-004",
+                    "name": "NAME",
+                    "position": "POSITION",
+                    "email": "EMAIL"
+                  }
+                ]
+              },
+              {
+                "id": "dept-002-001-003",
+                "name": "NAME",
+                "members": [
+                  {
+                    "id": "emp-002-001-003-001",
+                    "name": "NAME",
+                    "position": "POSITION",
+                    "email": "EMAIL"
+                  },
+                  {
+                    "id": "emp-002-001-003-002",
+                    "name": "NAME",
+                    "position": "POSITION",
+                    "email": "EMAIL"
+                  },
+                  {
+                    "id": "emp-002-001-003-003",
+                    "name": "NAME",
+                    "position": "POSITION",
+                    "email": "EMAIL"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "dept-002-002",
+            "name": "NAME",
+            "type": "team",
+            "totalMembers": 40,
+            "leader":[
+              {
+                "id": "emp-002-002-001",
+                "name": "NAME",
+                "position": "POSITION",
+                "email": "EMAIL"
+              },
+              {
+                "id": "emp-002-002-002",
+                "name": "NAME",
+                "position": "POSITION",
+                "email": "EMAIL"
+              }
+            ],
+
+
+
+            "children": [
+              {
+                "id": "dept-002-002-001",
+                "name": "NAME",
+                "members": [
+                  {
+                    "id": "emp-002-002-001-001",
+                    "name": "NAME",
+                    "position": "POSITION",
+                    "email": "EMAIL"
+                  },
+                  {
+                    "id": "emp-002-002-001-002",
+                    "name": "NAME",
+                    "position": "POSITION",
+                    "email": "EMAIL"
+                  },
+                  {
+                    "id": "emp-002-002-001-003",
+                    "name": "NAME",
+                    "position": "POSITION",
+                    "email": "EMAIL"
+                  }
+                ]
+              },
+              {
+                "id": "dept-002-002-002",
+                "name": "NAME",
+                "members": [
+                  {
+                    "id": "emp-002-002-002-001",
+                    "name": "NAME",
+                    "position": "POSITION",
+                    "email": "EMAIL"
+                  },
+                  {
+                    "id": "emp-002-002-002-002",
+                    "name": "NAME",
+                    "position": "POSITION",
+                    "email": "EMAIL"
+                  }
+                ]
+              },
+              {
+                "id": "dept-002-002-003",
+                "name": "NAME",
+                "members": [
+                  {
+                    "id": "emp-002-002-003-001",
+                    "name": "NAME",
+                    "position": "POSITION",
+                    "email": "EMAIL"
+                  },
+                  {
+                    "id": "emp-002-002-003-002",
+                    "name": "NAME",
+                    "position": "POSITION",
+                    "email": "EMAIL"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+
+      {
+        "id": "dept-003",
+        "name": "NAME",
+        "type": "department",
+        "totalMembers": 60,
+        "leader": [
+          {
+            "id": "emp-003",
+            "name": "NAME",
+            "position": "POSITION",
+            "email": "EMAIL"
+          }
+        ],
+        "children": [
+          {
+            "id": "dept-003-001",
+            "name": "NAME",
+            "members": [
+              {
+                "id": "emp-003-001-001",
+                "name": "NAME",
+                "position": "POSITION",
+                "email": "EMAIL"
+              }
+            ]
+          },
+          {
+            "id": "dept-003-002",
+            "name": "NAME",
+            "members": [
+              {
+                "id": "emp-003-002-001",
+                "name": "NAME",
+                "position": "POSITION",
+                "email": "EMAIL"
+              },
+              {
+                "id": "emp-003-002-002",
+                "name": "NAME",
+                "position": "POSITION",
+                "email": "EMAIL"
+              }
+            ]
+          },
+          {
+            "id": "dept-003-003",
+            "name": "NAME",
+            "members": [
+              {
+                "id": "emp-003-003-001",
+                "name": "NAME",
+                "position": "POSITION",
+                "email": "EMAIL"
+              },
+              {
+                "id": "emp-003-003-002",
+                "name": "NAME",
+                "position": "POSITION",
+                "email": ""
+              }
+            ]
+          },
+          {
+            "id": "dept-003-004",
+            "name": "NAME",
+            "members": [
+              {
+                "id": "emp-003-004-001",
+                "name": "NAME",
+                "position": "POSITION",
+                "email": "EMAIL"
+              },
+              {
+                "id": "emp-003-004-002",
+                "name": "NAME",
+                "position": "POSITION",
+                "email": "EMAIL"
+              }
+            ]
+          }
+        ]
+      },
+
+      {
+        "id": "dept-004",
+        "name": "NAME",
+        "type": "department",
+        "totalMembers": 30,
+        "leader":[
+          {
+            "id": "emp-004",
+            "name": "NAME",
+            "position": "POSITION",
+            "email": ""
+          }
+        ] ,
+        "children": []
+      }
+    ]
+  }
+}

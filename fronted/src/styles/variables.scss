@@ -1,0 +1,85 @@
+/* 颜色变量 */
+$primary-color: #E41E2B; // 华为红色
+$secondary-color: #00A0E9; // 蓝色
+$accent-blue-surface: #EEF6FF; // 浅蓝背景
+$accent-blue-glow: #5AAEFF33; // 浅蓝光晕
+$dark-color: #181818;
+$light-color: #F5F5F5;
+$background-color: #F8F9FA; // 背景色
+$gray-color: #CCCCCC;
+$gray-light-color: #EEEEEE;
+$gray-dark-color: #666666;
+$text-color: #333333;
+$link-color: #0066CC;
+$success-color: #52C41A;
+$warning-color: #FAAD14;
+$error-color: #FF4D4F;
+
+/* 断点变量 */
+$breakpoint-sm: 640px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 1024px;
+$breakpoint-xl: 1280px;
+$breakpoint-2xl: 1536px;
+
+/* 间距变量 */
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 32px;
+$spacing-2xl: 48px;
+$spacing-3xl: 64px;
+
+/* 高度变量 */
+$layout-header-height: 60px;
+
+/* 字体大小变量 */
+$font-size-xs: 12px;
+$font-size-sm: 14px;
+$font-size-base: 16px;
+$font-size-lg: 18px;
+$font-size-xl: 20px;
+$font-size-2xl: 24px;
+$font-size-3xl: 30px;
+$font-size-4xl: 36px;
+
+/* 边框变量 */
+$border-color: #E5E5E5;
+$border-radius-sm: 2px;
+$border-radius-base: 4px;
+$border-radius-lg: 8px;
+$border-radius-xl: 12px;
+$border-radius-full: 9999px;
+
+/* 阴影变量 */
+$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+$shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+$shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+
+/* 过渡变量 */
+$transition-duration: 0.3s;
+$transition-timing: ease-in-out;
+
+/* 字体族变量 */
+$font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', 'Helvetica Neue', Helvetica, Arial, sans-serif; // 正文字体
+$font-family-heading: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', sans-serif; // 标题字体
+$font-family-mono: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Source Code Pro', 'Consolas', monospace; // 代码字体
+
+/* 行高变量 */
+$line-height-tight: 1.2; // 紧凑行高（标题、代码）
+$line-height-normal: 1.5; // 正常行高（正文）
+$line-height-relaxed: 1.8; // 宽松行高（描述、长文本）
+
+/* Z-index 层级变量 */
+$z-dropdown: 1000; // 下拉菜单
+$z-sticky: 1020; // 粘性元素
+$z-fixed: 1030; // 固定定位元素
+$z-modal-backdrop: 1040; // 模态框背景
+$z-modal: 1050; // 模态框
+$z-popover: 1060; // 弹出框
+$z-tooltip: 1070; // 提示框
+
+/* 禁用状态变量 */
+$disabled-color: #CCCCCC; // 禁用元素背景色
+$disabled-text-color: #999999; // 禁用元素文字色
