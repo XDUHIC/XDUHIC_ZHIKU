@@ -26,12 +26,12 @@ export default defineConfig({
     strictPort:true,
     proxy: {
       '/api': {
-        target: process.env.VITE_API_BASE_URL || '<ip:port>',
+        target: process.env.VITE_API_BASE_URL ||  'http://localhost:8080',
         changeOrigin: true,
         secure: false
       },
       '/uploads': {
-        target: process.env.VITE_UPLOAD_BASE_URL || '<ip:port>',
+        target: process.env.VITE_UPLOAD_BASE_URL ||  'http://localhost:8080',
         changeOrigin: true,
         secure: false
       }

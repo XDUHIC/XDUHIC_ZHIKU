@@ -196,7 +196,13 @@ const navItems = [
   {id: 3, title: '华为竞赛', path: '/competitions', icon: 'trophy'},
   {id: 4, title: '实用工具', path: '/tools', icon: 'toolbox'},
   {id: 5, title: '华俱推文', path: '/articles', icon: 'newspaper'},
-  {id: 6, title: '师兄师姐说', path: '/share', icon: 'comment'}
+  {id: 6, title: '师兄师姐说', path: '/share', icon: 'comment'},
+  {
+    id: 7, // id 保持唯一，顺序递增即可
+    title: '组织架构', // 导航栏显示的文字
+    path: '/organization', // 必须与你在路由文件中配置的 `path` 完全一致
+    icon: 'sitemap' // 建议图标，表示组织结构。如果不确定，可先用 'users' 或 'diagram-project'
+  }
 ]
 </script>
 
