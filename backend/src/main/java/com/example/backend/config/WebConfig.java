@@ -22,7 +22,7 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addMapping("/api/**")
                 // 生产环境前端地址
                 .allowedOriginPatterns(
-                    "${FRONTEND_URL:http://localhost:3002/}"
+                    "http://localhost:*}"
                 )
                 .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                 .allowedHeaders("Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin")
@@ -33,7 +33,7 @@ public class WebConfig implements WebMvcConfigurer {
         // 为文件访问单独配置CORS
         registry.addMapping("/files/**")
                 .allowedOriginPatterns(
-                    "${FRONTEND_URL:http://localhost:3002/}"
+                    "http://localhost:*"
                 )
                 .allowedMethods("GET")
                 .allowedHeaders("*")
@@ -41,7 +41,7 @@ public class WebConfig implements WebMvcConfigurer {
                 
         registry.addMapping("/uploads/**")
                 .allowedOriginPatterns(
-                    "${FRONTEND_URL:http://localhost:3002/}"
+                    "http://localhost:*"
                 )
                 .allowedMethods("GET")
                 .allowedHeaders("*")

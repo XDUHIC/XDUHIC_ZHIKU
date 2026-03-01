@@ -125,6 +125,30 @@
                 prefix-icon="Lock"
             />
           </el-form-item>
+          <el-form-item label="学号" prop="studentId">
+            <el-input
+                v-model="form.studentId"
+                placeholder="请输入学号"
+                size="large"
+                prefix-icon="User"
+            />
+          </el-form-item>
+          <el-form-item label="学院" prop="college">
+            <el-select
+                v-model="form.college"
+                placeholder="请选择学院"
+                size="large"
+                clearable
+                style="width: 100%"
+            >
+              <el-option
+                  v-for="college in collegeOptions"
+                  :key="college.value"
+                  :label="college.label"
+                  :value="college.label"
+              />
+            </el-select>
+          </el-form-item>
 
           <div class="terms-section">
             <el-checkbox v-model="agreeTerms" size="small">
@@ -164,13 +188,14 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore, useAppStore } from '../stores'
 import { CircleCheck, CircleClose } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
 
 const router = useRouter()
 const authStore = useAuthStore()
 const appStore = useAppStore()
 
 const formRef = ref()
-const form = reactive({ username: '', nickname: '', password: '', confirm: '' })
+const form = reactive({ username: '', nickname: '', password: '', confirm: '',studentId:'',college:'' })
 const agreeTerms = ref(false)
 const checkingUsername = ref(false)
 const usernameStatus = ref(null)
@@ -188,8 +213,41 @@ const rules = {
   confirm: [
     { required: true, message: '请再次输入密码', trigger: 'blur' },
     { validator: (_, v, cb) => { v === form.password ? cb() : cb(new Error('两次密码不一致')) }, trigger: 'blur' }
+  ],
+  studentId: [
+    { required: true, message: '请输入学号', trigger: 'blur' },
+    { min: 11, max: 11, message: '学号必须是11位数字', trigger: 'blur' },
+    { pattern: /^\d+$/, message: '学号只能包含数字', trigger: 'blur' }
+  ],
+  college: [
+    {
+      required: true,
+      message: '请选择学院',
+      trigger: 'change'  // 下拉框更适合用 change 事件
+    }
   ]
 }
+// 在 Vue 组件中
+const collegeOptions = ref([
+  { value: 'communication', label: '通信工程学院' },
+  { value: 'electronic', label: '电子工程学院' },
+  { value: 'software', label: '计算机科学与技术学院' },
+  { value: 'machine', label: '机电工程学院' },
+  { value: 'physics', label: '物理学院' },
+  { value: 'light', label: '光电工程学院' },
+  { value: 'economy', label: '经济与管理学院' },
+  { value: 'math', label: '数学与统计学院' },
+  { value: 'people', label: '人文学院' },
+  { value: 'foreign', label: '外国语学院' },
+  { value: 'circut', label: '集成电路学部' },
+  { value: 'science', label: '生命科学技术学院' },
+  { value: 'polyspace', label: '空间科学与技术学院' },
+  { value: 'material', label: '先进材料与纳米科技学院' },
+  { value: 'security', label: '网络与信息安全学院' },
+  { value: 'ai', label: '人工智能学院' },
+  { value: 'information', label: '信息力学与感知工程学院' },
+  { value: 'pe', label: '体育部' }
+])
 
 const submitting = ref(false)
 
@@ -243,18 +301,23 @@ function onSubmit() {
       const res = await authStore.register({
         username: form.username,
         password: form.password,
-        nickname: form.nickname
+        nickname: form.nickname || form.username,
+        studentId:form.studentId,
+        college:form.college
       })
       submitting.value = false
-      if (res.success) {
+      if (res&&res.success) {
         appStore.addNotification({ type: 'success', message: '注册成功，请登录' })
         router.push(`/auth/login?u=${encodeURIComponent(form.username)}`)
       } else {
-        appStore.addNotification({ type: 'error', message: '注册失败，请稍后重试' })
+        const errorMsg=res?.message||'注册失败，请稍后重试'
+        ElMessage.error(errorMsg)
+        appStore.addNotification({type:'error',message:errorMsg})
       }
     } catch (e) {
       submitting.value = false
       const msg = e?.response?.data?.message || '注册失败'
+      ElMessage.error(msg)
       appStore.addNotification({ type: 'error', message: msg })
     }
   })

@@ -21,7 +21,7 @@ public class CorsConfig {
         
         // 允许的域名（生产环境）
         configuration.setAllowedOriginPatterns(Arrays.asList(
-            "${FRONTEND_URL:http://localhost:3002/}",
+            "http://localhost:*",
             "https://www.xduhic.top",  // 生产环境域名
             "https://xduhic.top"  // 生产环境域名
         ));
