@@ -13,7 +13,7 @@ $primary-color: #FF4B58;
 // --- 背景色系 ---
 $bg-dark-base: #121212; // 页面最底层背景
 $bg-dark-surface: #1e1e1e; // 通用容器
-$bg-dark-card: #1b1c21; // 卡片基础色
+$bg-dark-card: #242424; // 卡片基础色
 $bg-dark-input: #262626; // 输入框
 $bg-dark-hover: #2d2d2d; // 悬浮态
 $bg-dark-section: #15151a; // 深色区块
@@ -48,7 +48,7 @@ $markdown-table-stripe: #20242d;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); // 丝滑过渡
 }
 
-// 流光角标
+// 风格 A 流光角标 - 适用于 [项目分享/华为竞赛]
 @mixin card-style-neon {
   @include card-base;
   border: 1px solid $border-color-base !important;
@@ -97,22 +97,23 @@ $markdown-table-stripe: #20242d;
   }
 }
 
-
-// 极光晕影
-@mixin card-style-tech {
+// 风格 B 渐变光晕 - 适用于 [知识库]
+@mixin card-style-gradient-border {
   @include card-base;
-  border: 1px solid $border-color-base !important;
+  border: 1px solid transparent !important;
+  background:
+          linear-gradient($bg-dark-card, $bg-dark-card) padding-box,
+          linear-gradient(135deg, rgba(64,201,255,.55), rgba(128,0,255,.45), rgba(255,64,128,.35)) border-box;
 
   &:hover {
-    border-color: transparent !important; // 边框隐去，让阴影成为视觉边框
-    box-shadow: 0 0 12px rgba(64, 201, 255, 0.4), // 青
-    0 0 24px rgba(128, 0, 255, 0.25), // 紫
-    0 0 36px rgba(255, 64, 128, 0.15) !important; // 品红
-    transition: box-shadow 0.4s ease, border-color 0.2s ease;
+    background:
+            linear-gradient($bg-dark-card, $bg-dark-card) padding-box,
+            linear-gradient(135deg, rgba(64,201,255,.85), rgba(128,0,255,.70), rgba(255,64,128,.60)) border-box;
+    box-shadow: 0 8px 24px rgba(64, 201, 255, .18);
   }
 }
 
-// 风格 C: 悬停时底部滑出一道亮线 - 适用于 [首页特性/公告]
+// 风格 C 悬停时底部滑出一道亮线 - 适用于 [首页特性/公告]
 @mixin card-style-line {
   @include card-base;
   border: 1px solid $border-color-base !important;
@@ -139,7 +140,7 @@ $markdown-table-stripe: #20242d;
   }
 }
 
-// 风格 D 晶格点阵
+// 风格 D 晶格点阵 - 适用于 [师兄师姐说/实用工具]
 @mixin card-style-focus {
   @include card-base;
   border: 1px solid $border-color-base !important;
@@ -149,6 +150,19 @@ $markdown-table-stripe: #20242d;
     box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05),
     0 0 16px rgba(255, 255, 255, 0.15) !important;
     // 保持背景色完全不变，仅边框与阴影
+  }
+}
+
+// 风格 E 左侧强调线
+@mixin card-style-data-accent {
+  @include card-base;
+  border: 1px solid rgba($bg-dark-hover, 0.08);
+  border-left: 3px solid rgba($primary-color, 0.35);
+
+  &:hover {
+    border-color: rgba(196, 174, 231, 0.55);
+    border-left-color: rgba(196, 174, 231, 0.6);
+    box-shadow: 0 3px 5px rgba(196, 174, 231, 0.35);
   }
 }
 
@@ -260,8 +274,8 @@ html.dark {
     }
   }
 
-  // 公告、事件页面顶部标题区域
-  .announcement-detail-page, .event-detail-page {
+  // 公告、事件、分享页面顶部标题区域
+  .announcement-detail-page, .event-detail-page, .share-detail-page{
     .page-header {
       background: linear-gradient(135deg, #8e9e9f 0%, #77809d 50%, #776a8f 100%);
     }
@@ -294,11 +308,12 @@ html.dark {
     }
   }
 
-  .filter-section, .category-nav, .knowledge-header {
+  .filter-section, .category-nav, .knowledge-header, .organization-tree-container {
     background-color: $bg-dark-surface !important;
     border-color: $border-color-base !important;
 
     .search-box {
+      background: $bg-dark-surface;
       .search-label {
         color: $text-color-tertiary;
       }
@@ -340,7 +355,7 @@ html.dark {
 
   /* 知识库 */
   .resource-card {
-    @include card-style-tech; // <--- 应用样式 B
+    @include card-style-gradient-border; // <--- 应用样式 B
 
     .resource-content {
       .resource-description {
@@ -365,6 +380,10 @@ html.dark {
 
     .project-meta span {
       color: $text-color-tertiary !important;
+    }
+
+    .competition-description{
+      color: $text-color-tertiary;
     }
   }
 
@@ -399,17 +418,26 @@ html.dark {
     }
   }
 
-  /* --- 其他页面 --- */
+  /* --- 微信推文页面 --- */
   .articles-page {
     background-color: $bg-dark-base;
+
+    .article-card{
+      @include card-style-data-accent; // <--- 应用样式 D
+      .article-summary{
+        color: $text-color-tertiary;
+      }
+    }
   }
 
-  .article-card, .resource-item, .sidebar-box, .subscription-card {
+
+  .resource-item, .sidebar-box, .subscription-card {
     background-color: $bg-dark-surface !important;
     border-color: $border-color-base !important;
     color: #e5e7eb !important;
   }
 
+  /* --- 师兄师姐说页面 --- */
   .shares-page {
     background-color: $bg-dark-base;
 
@@ -445,7 +473,6 @@ html.dark {
     }
   }
 
-
   /* 详情页与内容文档区域 */
   .announcement-detail-page,
   .project-detail-page,
@@ -465,6 +492,37 @@ html.dark {
     .empty,
     .loading {
       color: $text-color-tertiary !important;
+    }
+  }
+
+  /* --- 组织架构页面 --- */
+  .organization-tree-container{
+    background: $bg-dark-surface;
+    .tree-wrapper{
+      background: $bg-dark-base;
+
+      .node-content{
+        background:$bg-dark-hover;;
+        .node-name{
+          color: $text-color-primary;
+        }
+      }
+
+      .node-content.is-department{
+        background:$bg-dark-hover;
+        .node-name{
+          color: $text-color-secondary;
+        }
+      }
+    }
+    .node-detail-panel{
+      background:$bg-dark-hover;
+      .leader-card{
+        background: $bg-dark-card;
+      }
+      .member-item{
+        background: $bg-dark-card;
+      }
     }
   }
 
@@ -544,7 +602,7 @@ html.dark {
   .about-page,
   .favorites-page,
   .profile-wrapper,
-  .project-repository {
+  .project-repository{
     background-color: $bg-dark-base !important;
     color: $text-color-primary !important;
 
@@ -597,7 +655,7 @@ html.dark {
     .title,
     .subtitle,
     .footer-text,
-    .el-form-item__label {
+    .el-form-item__label{
       color: $text-color-primary !important;
     }
 
@@ -654,7 +712,9 @@ html.dark {
     .el-form-item__label,
     .el-input__inner,
     .el-textarea__inner,
-    .el-select__placeholder {
+    .el-select__placeholder,
+    .el-select__selected-item,
+    .el-select__input {
       color: $text-color-primary !important;
     }
 

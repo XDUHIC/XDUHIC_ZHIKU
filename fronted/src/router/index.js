@@ -17,6 +17,7 @@ const Announcements = () => import('../pages/Announcements.vue')
 const Events = () => import('../pages/Events.vue')
 const AnnouncementDetail = () => import('../pages/AnnouncementDetail.vue')
 const EventDetail = () => import('../pages/EventDetail.vue')
+const OrganizationTree = () => import('../components/OrganizationTree.vue') //
 
 // 还未实现的页面组件，暂时使用占位组件
 // 这些组件将在后续开发中实现
@@ -145,6 +146,12 @@ const routes = [
     meta: { title: '师兄师姐说 - 华创智库' }
   },
   {
+    path: '/organization', // 访问路径，可自定义为 '/team'、'/structure' 等
+    name: 'OrganizationTree', // 路由名称，用于编程式导航
+    component: OrganizationTree, // 使用上面懒加载导入的组件
+    meta: { title: '组织架构 - 华创智库' } // 务必设置标题，路由守卫会用它更新页面标题
+  },
+  {
     path: '/share/upload',
     name: 'ShareUpload',
     component: ShareUpload,
@@ -205,7 +212,7 @@ router.beforeEach(async (to, from, next) => {
   if (to.meta.title) {
     document.title = to.meta.title
   }
-  
+
   // 认证守卫（避免在 Pinia 尚未激活时报错，直接读本地存储）
   let isLoggedIn = false
   let accessToken = ''
@@ -217,14 +224,14 @@ router.beforeEach(async (to, from, next) => {
       accessToken = parsed.accessToken || ''
     }
   } catch (_) {}
-  
+
   // 如果有token，检查是否已过期
   if (isLoggedIn && accessToken) {
     try {
       const payload = JSON.parse(atob(accessToken.split('.')[1]))
       const expiration = new Date(payload.exp * 1000)
       const now = new Date()
-      
+
       if (expiration <= now) {
         // token已过期，清除本地存储
         localStorage.removeItem('authState')
@@ -236,22 +243,22 @@ router.beforeEach(async (to, from, next) => {
       isLoggedIn = false
     }
   }
-  
+
   // 已登录用户访问根目录时跳转到portal
   if (to.path === '/' && isLoggedIn) {
     return next({ path: '/portal' })
   }
-  
+
   // 需要认证的页面，如果未登录，跳转到登录页面
   if (to.meta.requiresAuth && !isLoggedIn) {
     return next({ path: '/auth/login', query: { redirect: to.fullPath } })
   }
-  
+
   // 已登录用户访问登录/注册页面时跳转到个人主页
   if (to.meta.guestOnly && isLoggedIn) {
     return next({ path: '/auth/profile' })
   }
-  
+
   next()
 })
 

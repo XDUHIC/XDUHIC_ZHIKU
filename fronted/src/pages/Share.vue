@@ -20,7 +20,7 @@
                 v-for="(contributor, index) in contributors"
                 :key="index"
                 class="contributor-card"
-                @click="filterByContributor(contributor.id)"
+                @click="handleContributorClick(contributor)"
             >
               <div class="contributor-avatar">
                 <img :src="contributor.avatar" :alt="contributor.name">
@@ -210,7 +210,7 @@ const contributors = [
     id: 6,
     name: '亓文',
     avatar: xy4,
-    position: '计算机科学与技术学院',
+    position: '电子工程学院',
     company: '西安电子科技大学',
     actionType: 'internal',
   },
@@ -219,7 +219,7 @@ const contributors = [
     id: 7,
     name: '高理祥',
     avatar: xy4,
-    position: '计算机科学与技术学院',
+    position: '电子工程学院',
     company: '西安电子科技大学',
     actionType: 'internal',
   },
@@ -370,7 +370,7 @@ const filterByContributor = (contributorId) => {
   selectedContributor.value = contributorId
   currentPage.value = 1
   shares.value = []
-  hasMore.value = true
+  /*hasMore.value = true*/
   fetchShares()
 }
 
