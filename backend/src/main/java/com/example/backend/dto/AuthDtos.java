@@ -21,6 +21,13 @@ public class AuthDtos {
         @Size(max = 50, message = "昵称长度不能超过50个字符")
         private String nickname;
 
+        @NotBlank(message = "学院不能为空")
+        private String college;
+
+        @NotBlank(message = "学号不能为空")
+        @Size(min=11,max=11,message = "学号长度为11位")
+        private String studentId;
+
         // 手动添加getter/setter方法以解决Lombok问题
         public String getUsername() { return username; }
         public void setUsername(String username) { this.username = username; }
@@ -30,6 +37,12 @@ public class AuthDtos {
         
         public String getNickname() { return nickname; }
         public void setNickname(String nickname) { this.nickname = nickname; }
+
+        public String getCollege(){return college;}
+        public void setCollege(String college){this.college = college;}
+
+        public String getStudentId() { return studentId; }
+        public void setStudentId(String studentId) { this.studentId = studentId; }
     }
 
     @Data

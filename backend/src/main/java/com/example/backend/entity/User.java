@@ -12,6 +12,7 @@ public class User {
     private String email;
     private String avatarUrl;
     private String college;
+    private String studentId;
     private String bio;
     private Integer status; // 1 启用 0 禁用
     private Integer hic; // HIC认证状态：0-未认证，1-已认证
@@ -98,6 +99,16 @@ public class User {
     public void setHic(Integer hic) {
         this.hic = hic;
     }
+
+    public void setCollege(String college) {
+        this.college = college;
+    }
+
+    public String getCollege() {return college;}
+
+    public void setStudentId(String studentId) {this.studentId = studentId;}
+
+    public String getStudentId() {return studentId;}
 }
 
 

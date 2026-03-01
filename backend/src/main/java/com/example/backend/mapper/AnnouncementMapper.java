@@ -24,10 +24,6 @@ public interface AnnouncementMapper {
     @Options(useGeneratedKeys = true, keyProperty = "id")
     int insert(Announcement a);
 
-    // 公告数量
-    @Select("SELECT COUNT(*) FROM announcements")
-    long count();
-
     // 按搜索关键词查询公告
     @Select("SELECT id, title, summary, content, cover_url AS coverUrl, view_count AS viewCount, publish_time AS publishTime FROM announcements WHERE (title LIKE CONCAT('%', #{search}, '%') OR summary LIKE CONCAT('%', #{search}, '%')) ORDER BY publish_time DESC, id DESC LIMIT ${limit} OFFSET ${offset}")
     List<Announcement> listBySearch(@Param("offset") int offset, @Param("limit") int limit, @Param("search") String search);

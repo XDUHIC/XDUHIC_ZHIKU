@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.example.backend.dto.AuthDtos;
@@ -21,20 +22,42 @@ public class AuthService {
 
     @Value("${app.hic.auth.key:}")
     private String hicAuthKey;
-
+    @Transactional
+    //用户注册：1、增加学院和学号两项2、判断学院是否存在3、判断学号是否是本校学生
     public void register(AuthDtos.RegisterReq req) {
         if (userMapper.findByUsername(req.getUsername()) != null) {
             throw new RuntimeException("用户名已存在");
+        }
+        //新增-检查学号是否已存在
+        if(userMapper.findByStudentId(req.getStudentId())!=null){
+            throw new RuntimeException("该学号已被注册");
         }
         User u = new User();
         u.setUsername(req.getUsername());
         u.setPassword(req.getPassword());
         // 使用传入的昵称，如果为空则使用用户名作为默认昵称
-        u.setNickname(req.getNickname() != null && !req.getNickname().trim().isEmpty() 
-                      ? req.getNickname().trim() : req.getUsername());
+        u.setNickname(req.getNickname() != null && !req.getNickname().trim().isEmpty()
+                ? req.getNickname().trim() : req.getUsername());
+        //新增学号和学院
+        u.setStudentId(req.getStudentId());
+        u.setCollege(req.getCollege());
         u.setStatus(1);
         userMapper.insert(u);
     }
+//    public void register(AuthDtos.RegisterReq req) {
+//        if (userMapper.findByUsername(req.getUsername()) != null) {
+//            throw new RuntimeException("用户名已存在");
+//        }
+//        User u = new User();
+//        u.setUsername(req.getUsername());
+//        u.setPassword(req.getPassword());
+//        // 使用传入的昵称，如果为空则使用用户名作为默认昵称
+//        u.setNickname(req.getNickname() != null && !req.getNickname().trim().isEmpty()
+//                      ? req.getNickname().trim() : req.getUsername());
+//        u.setStatus(1);
+//        userMapper.insert(u);
+//    }
+
 
     public Map<String, Object> login(AuthDtos.LoginReq req) {
         User u = userMapper.findByUsername(req.getUsername());

@@ -8,9 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.util.stream.Collectors;
 
 @Service
 public class ArticleServiceImpl implements ArticleService {
@@ -24,34 +24,34 @@ public class ArticleServiceImpl implements ArticleService {
         this.articleMapper = articleMapper;
     }
 
+    /**
+     * 去除参数首尾空格及首尾双引号（部分客户端会传 "undergrad" 导致与库中 undergrad 不匹配）。
+     */
+    private static String normalizeParam(String value) {
+        if (value == null) return null;
+        value = value.trim();
+        if (value.length() >= 2 && value.startsWith("\"") && value.endsWith("\"")) {
+            value = value.substring(1, value.length() - 1).trim();
+        }
+        return value.isEmpty() ? null : value;
+    }
+
     @Override
-    public PageResponse<Article> list(int page, int size, String search) {
+    public PageResponse<Article> list(int page, int size, String search, String source) {
         if (page < 1) {
             page = 1;
         }
         if (size < 1) {
             size = 10;
         }
+        search = normalizeParam(search);
+        source = normalizeParam(source);
         int offset = (page - 1) * size;
         if (search != null && !search.isEmpty()) {
-            String codePoints = search.chars().mapToObj(c -> String.format("U+%04X", c)).collect(Collectors.joining(","));
-            log.debug("Article search param raw: [{}], length={}, codePoints=[{}]", search, search.length(), codePoints);
-            
-            // 测试简化的搜索方法
-            try {
-                List<Article> testResults = articleMapper.testSearch(search);
-                log.debug("Test search results count: {}", testResults.size());
-                if (!testResults.isEmpty()) {
-                    log.debug("First test result: id={}, title={}", testResults.get(0).getId(), testResults.get(0).getTitle());
-                }
-            } catch (Exception e) {
-                log.error("Test search failed", e);
-            }
-        } else {
-            log.debug("Article list without search, page={}, size={}, offset={}", page, size, offset);
+            log.debug("Article search param: [{}], page={}, size={}, source={}", search, page, size, source);
         }
-        List<Article> data = articleMapper.list(offset, size, search);
-        long total = articleMapper.count(search);
+        List<Article> data = articleMapper.list(offset, size, search, source);
+        long total = articleMapper.count(search, source);
         return new PageResponse<>(data, total, page, size);
     }
 

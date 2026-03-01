@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.backend.dto.UserDtos;
 import com.example.backend.entity.User;
+import com.example.backend.service.PointService;
 import com.example.backend.service.SecurityAuditService;
 import com.example.backend.service.UserService;
 
@@ -25,12 +26,24 @@ import lombok.RequiredArgsConstructor;
 public class UserController {
     private final UserService userService;
     private final SecurityAuditService securityAuditService;
+    private final PointService pointService;
 
     @GetMapping("/me")
     public ResponseEntity<?> me(Authentication authentication) {
         String username = authentication.getName();
         User u = userService.getByUsername(username);
         return ResponseEntity.ok(Map.of("code", 0, "message", "OK", "data", userService.toProfile(u)));
+    }
+
+    @GetMapping("/me/points")
+    public ResponseEntity<?> myPoints(Authentication authentication) {
+        String username = authentication.getName();
+        User u = userService.getByUsername(username);
+        if (u == null) {
+            return ResponseEntity.status(401).body(Map.of("code", 401, "message", "用户不存在"));
+        }
+        int balance = pointService.getBalance(u.getId());
+        return ResponseEntity.ok(Map.of("code", 0, "message", "OK", "data", Map.of("balance", balance)));
     }
 
     @PutMapping("/me")

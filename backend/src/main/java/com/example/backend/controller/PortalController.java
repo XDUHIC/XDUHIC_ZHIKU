@@ -48,14 +48,10 @@ public class PortalController {
     public ResponseEntity<?> announcements(@RequestParam(defaultValue = "1") int page,
                                            @RequestParam(defaultValue = "10") int size) {
         List<Announcement> list = announcementService.listAll(page, size);
-
-        long total = announcementService.count();
-
         Map<String, Object> resp = new HashMap<>();
         resp.put("code", 0);
         resp.put("message", "OK");
         resp.put("data", list);
-        resp.put("total", total);
         return ResponseEntity.ok(resp);
     }
 
@@ -63,8 +59,8 @@ public class PortalController {
      * 公告详情
      */
     @GetMapping("/announcements/{id}")
-    public ResponseEntity<?> announcementDetail(@PathVariable Long id,
-                                                @RequestParam(defaultValue = "false") boolean increaseView) {
+    public ResponseEntity<?> announcementDetail(@PathVariable Long id, 
+                                               @RequestParam(defaultValue = "false") boolean increaseView) {
         Announcement a = announcementService.getById(id, increaseView);
         if (a == null) {
             return ResponseEntity.status(404).body(Map.of("code", 404, "message", "公告不存在"));

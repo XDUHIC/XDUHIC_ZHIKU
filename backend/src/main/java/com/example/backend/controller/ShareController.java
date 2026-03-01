@@ -3,10 +3,18 @@ package com.example.backend.controller;
 import com.example.backend.dto.response.ApiResponse;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.entity.Share;
+import com.example.backend.entity.User;
 import com.example.backend.service.ShareService;
+import com.example.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 @RestController
@@ -14,20 +22,23 @@ import java.util.List;
 public class ShareController {
 
     private final ShareService shareService;
+    private final UserService userService;
 
     @Value("${file.upload.path:uploads}")
     private String uploadPath;
 
-    public ShareController(ShareService shareService) {
+    public ShareController(ShareService shareService, UserService userService) {
         this.shareService = shareService;
+        this.userService = userService;
     }
 
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<Share>>> list(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String search) {
-        PageResponse<Share> pr = shareService.list(page, size, search);
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String category) {
+        PageResponse<Share> pr = shareService.list(page, size, search, category);
         return ResponseEntity.ok(ApiResponse.success(pr));
     }
 
@@ -56,8 +67,12 @@ public class ShareController {
         if (share == null) {
             return ResponseEntity.ok(ApiResponse.error("分享不存在"));
         }
-        // 若 textUrl 为空，按约定位置查找 Markdown 文件，但不修改对象本身（返回给前端的 textUrl 仍可能为空）
-        // 前端会根据 textUrl 是否以 http 或 /uploads/ 开头自行加载
+        if (share.getTextUrl() == null || share.getTextUrl().isBlank()) {
+            Path mdPath = Paths.get(uploadPath, "shares", "contents", id + ".md");
+            if (Files.exists(mdPath)) {
+                share.setTextUrl("/uploads/shares/contents/" + id + ".md");
+            }
+        }
         return ResponseEntity.ok(ApiResponse.success(share));
     }
 
@@ -68,9 +83,25 @@ public class ShareController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Share>> create(@RequestBody Share share) {
+    public ResponseEntity<ApiResponse<Share>> create(
+            @RequestParam("title") String title,
+            @RequestParam("content") String content,
+            @RequestParam(value = "category", required = false, defaultValue = "others") String category,
+            @RequestParam(value = "tags", required = false) String tags,
+            @RequestParam(value = "documentFile", required = false) MultipartFile documentFile,
+            Authentication authentication) {
         try {
-            Share createdShare = shareService.create(share);
+            Long authorId = null;
+            if (authentication != null) {
+                User u = userService.getByUsername(authentication.getName());
+                if (u != null) authorId = u.getId();
+            }
+            Share share = new Share();
+            share.setTitle(title);
+            share.setContent(content);
+            share.setCategory(category);
+            share.setTags(tags);
+            Share createdShare = shareService.create(share, authorId, documentFile);
             return ResponseEntity.ok(ApiResponse.success(createdShare));
         } catch (Exception e) {
             return ResponseEntity.ok(ApiResponse.error("创建分享失败: " + e.getMessage()));

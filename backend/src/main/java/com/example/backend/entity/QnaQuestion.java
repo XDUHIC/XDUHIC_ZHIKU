@@ -1,23 +1,21 @@
 package com.example.backend.entity;
 
 import lombok.Data;
-
 import java.time.LocalDateTime;
 
 /**
- * 师兄师姐说（经验分享）实体类
- * 分类：learn-学习经验 / job-就业经验 / plan-规划经验 / others-其他
+ * 答疑解惑-问题实体
  */
 @Data
-public class Share {
+public class QnaQuestion {
     private Long id;
+    private Long userId;
     private String title;
     private String content;
-    private String category;
     private String tags;
-    private Long authorId;
-    private String authorName;
-    private String textUrl;
     private Integer viewCount;
+    private Integer answerCount;
+    private Long acceptedAnswerId;
     private LocalDateTime createdAt;
+    private String authorName;
 }
