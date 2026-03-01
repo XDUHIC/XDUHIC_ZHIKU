@@ -14,16 +14,17 @@ import com.example.backend.entity.User;
 @Mapper
 public interface UserMapper {
 
-    @Insert("INSERT INTO users(username, password, nickname, status, created_at) " +
-            "VALUES(#{username}, #{password}, #{nickname}, #{status}, NOW())")
+
+    @Insert("INSERT INTO users(username, password, nickname, status,student_id,college, created_at) " +
+            "VALUES(#{username}, #{password}, #{nickname}, #{status},#{studentId},#{college}, NOW())")
     @Options(useGeneratedKeys = true, keyProperty = "id")
     int insert(User user);
 
-    @Select("SELECT id, username, password, nickname, email, avatar_url, college, bio, status, hic, last_login_time, created_at " +
+    @Select("SELECT id, username, password, nickname, email, avatar_url, student_id,college, bio, status, hic, last_login_time, created_at " +
             "FROM users WHERE username = #{username}")
     User findByUsername(String username);
 
-    @Select("SELECT id, username, password, nickname, email, avatar_url, college, bio, status, hic, last_login_time, created_at " +
+    @Select("SELECT id, username, password, nickname, email, avatar_url,student_id, college, bio, status, hic, last_login_time, created_at " +
             "FROM users WHERE id = #{id}")
     User findById(Long id);
 
@@ -37,13 +38,43 @@ public interface UserMapper {
             "  <if test='college != null'>college = #{college},</if>",
             "  <if test='bio != null'>bio = #{bio},</if>",
             "  <if test='hic != null'>hic = #{hic},</if>",
+            "  <if test='studentId != null'>student_id = #{studentId},</if>",
             "</set>",
             "WHERE id = #{id}",
             "</script>"
     })
     int updateProfile(User user);
 
-    @Update("UPDATE users SET password = #{password} WHERE id = #{id}")
+//    @Insert("INSERT INTO users(username, password, nickname, status, created_at) " +
+//            "VALUES(#{username}, #{password}, #{nickname}, #{status}, NOW())")
+//    @Options(useGeneratedKeys = true, keyProperty = "id")
+//    int insert(User user);
+//
+//    @Select("SELECT id, username, password, nickname, email, avatar_url, college, bio, status, hic, last_login_time, created_at " +
+//            "FROM users WHERE username = #{username}")
+//    User findByUsername(String username);
+//
+//    @Select("SELECT id, username, password, nickname, email, avatar_url, college, bio, status, hic, last_login_time, created_at " +
+//            "FROM users WHERE id = #{id}")
+//    User findById(Long id);
+
+//    @Update({
+//            "<script>",
+//            "UPDATE users",
+//            "<set>",
+//            "  <if test='nickname != null'>nickname = #{nickname},</if>",
+//            "  <if test='email != null'>email = #{email},</if>",
+//            "  <if test='avatarUrl != null'>avatar_url = #{avatarUrl},</if>",
+//            "  <if test='college != null'>college = #{college},</if>",
+//            "  <if test='bio != null'>bio = #{bio},</if>",
+//            "  <if test='hic != null'>hic = #{hic},</if>",
+//            "</set>",
+//            "WHERE id = #{id}",
+//            "</script>"
+//    })
+//    int updateProfile(User user);
+
+    @Update("UPDATE users SET password = REPLACE(#{password}, '\"', '') WHERE id = #{id}")
     int updatePassword(@Param("id") Long id, @Param("password") String password);
 
     @Update("UPDATE users SET avatar_url = #{avatarUrl} WHERE id = #{id}")
@@ -62,6 +93,11 @@ public interface UserMapper {
     @Select("SELECT id, username, password, nickname, email, avatar_url, college, bio, status, hic, last_login_time, created_at " +
             "FROM users ORDER BY created_at DESC LIMIT #{offset}, #{limit}")
     List<User> list(@Param("offset") int offset, @Param("limit") int limit);
+
+//    boolean findByStudentId(String studentId);
+    @Select("SELECT id, username, password, nickname, email, avatar_url, college, bio, status, hic, last_login_time, created_at " +
+            "FROM users WHERE student_id = #{studentId}")
+    User findByStudentId(@Param("studentId") String studentId);
 }
 
 

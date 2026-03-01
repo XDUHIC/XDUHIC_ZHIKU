@@ -14,6 +14,8 @@ public class Article {
     private String linkUrl;
     private LocalDateTime publishTime;
     private LocalDateTime createdAt;
+    /** 来源：undergrad-本科，postgrad-研究生 */
+    private String source;
 }
 
 

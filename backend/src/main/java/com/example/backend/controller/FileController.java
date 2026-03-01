@@ -24,7 +24,7 @@ public class FileController {
     @Value("${file.upload.path:uploads}")
     private String uploadPath;
     
-    @Value("${file.upload.url:http://localhost:8081/uploads}")
+    @Value("${file.upload.url:http://47.120.56.112:8081/uploads}")
     private String uploadUrl;
     
     /**

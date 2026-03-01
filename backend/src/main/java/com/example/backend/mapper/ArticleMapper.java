@@ -8,43 +8,12 @@ import java.util.List;
 @Mapper
 public interface ArticleMapper {
 
-    @Select("SELECT id, title, summary, cover_image AS coverImage, view_count AS viewCount, link_url AS linkUrl, publish_time AS publishTime, created_at AS createdAt FROM articles ORDER BY publish_time DESC, id DESC LIMIT ${limit} OFFSET ${offset}")
-    List<Article> listAll(@Param("offset") int offset, @Param("limit") int limit);
+    List<Article> list(@Param("offset") int offset, @Param("limit") int limit,
+                      @Param("search") String search, @Param("source") String source);
 
-    @Select({
-            "<script>",
-            "SELECT id, title, summary, cover_image AS coverImage, view_count AS viewCount, link_url AS linkUrl, publish_time AS publishTime, created_at AS createdAt",
-            " FROM articles",
-            " WHERE (title LIKE '%${search}%' OR summary LIKE '%${search}%')",
-            " ORDER BY publish_time DESC, id DESC",
-            " LIMIT ${limit} OFFSET ${offset}",
-            "</script>"
-    })
-    List<Article> listBySearch(@Param("search") String search, @Param("offset") int offset, @Param("limit") int limit);
+    long count(@Param("search") String search, @Param("source") String source);
 
-    @Select("SELECT COUNT(*) FROM articles")
-    long countAll();
-
-    @Select("SELECT COUNT(*) FROM articles WHERE (title LIKE '%${search}%' OR summary LIKE '%${search}%')")
-    long countBySearch(@Param("search") String search);
-
-    default List<Article> list(int offset, int limit, String search) {
-        boolean hasSearch = search != null && !search.trim().isEmpty();
-        if (hasSearch) {
-            return listBySearch(search, offset, limit);
-        }
-        return listAll(offset, limit);
-    }
-
-    default long count(String search) {
-        boolean hasSearch = search != null && !search.trim().isEmpty();
-        if (hasSearch) {
-            return countBySearch(search);
-        }
-        return countAll();
-    }
-
-    @Select("SELECT id, title, summary, cover_image AS coverImage, view_count AS viewCount, link_url AS linkUrl, publish_time AS publishTime, created_at AS createdAt FROM articles WHERE id = #{id}")
+    @Select("SELECT id, title, summary, cover_image AS coverImage, view_count AS viewCount, link_url AS linkUrl, publish_time AS publishTime, created_at AS createdAt, source FROM articles WHERE id = #{id}")
     Article findById(@Param("id") Long id);
 
     @Update("UPDATE articles SET view_count = view_count + 1 WHERE id = #{id}")

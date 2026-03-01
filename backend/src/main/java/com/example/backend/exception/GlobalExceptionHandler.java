@@ -12,7 +12,9 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 
 @RestControllerAdvice
@@ -58,6 +60,22 @@ public class GlobalExceptionHandler {
         logger.warn("非法参数: {}", ex.getMessage());
         return ResponseEntity.badRequest()
                 .body(Map.of("code", 400, "message", "请求参数错误"));
+    }
+
+    /**
+     * 未映射的请求（如浏览器请求 /favicon.ico、错误 URL）。
+     * 对 favicon.ico / robots.txt 等仅打 DEBUG，避免刷 ERROR 日志。
+     */
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public ResponseEntity<?> handleNoHandlerFound(NoHandlerFoundException ex, HttpServletRequest request) {
+        String path = request.getRequestURI();
+        if (path != null && (path.endsWith("favicon.ico") || path.endsWith("robots.txt"))) {
+            logger.debug("未映射的请求（可忽略）: {}", path);
+        } else {
+            logger.warn("未映射的请求: {} {}", request.getMethod(), path);
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("code", 404, "message", "接口不存在"));
     }
 
     @ExceptionHandler(RuntimeException.class)

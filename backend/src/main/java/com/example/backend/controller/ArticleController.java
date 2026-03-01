@@ -23,8 +23,9 @@ public class ArticleController {
     public ResponseEntity<ApiResponse<PageResponse<Article>>> list(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String search) {
-        PageResponse<Article> response = articleService.list(page, size, search);
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String source) {
+        PageResponse<Article> response = articleService.list(page, size, search, source);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

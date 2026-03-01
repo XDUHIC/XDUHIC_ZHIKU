@@ -15,11 +15,6 @@ public class AnnouncementServiceImpl implements AnnouncementService {
     private final AnnouncementMapper announcementMapper;
 
     @Override
-    public long count() {
-        return announcementMapper.count();
-    }
-
-    @Override
     public List<Announcement> listAll(int page, int size) {
         if (page < 1) page = 1;
         if (size < 1) size = 10;
