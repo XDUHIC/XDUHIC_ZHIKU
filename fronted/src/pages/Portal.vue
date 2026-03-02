@@ -342,7 +342,11 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-@import '../styles/variables.scss';
+// 导入变量文件
+@import '../styles/variables';
+// 导入卡片样式
+@import '../styles/card-variants';
+
 
 .home-page {
   padding-bottom: $spacing-2xl;
@@ -538,7 +542,7 @@ onMounted(() => {
 }
 
 .feature-card {
-  background-color: white;
+  @include card-style-line; // <--- 应用样式 C
   border-radius: $border-radius-base;
   padding: $spacing-lg;
   text-align: center;
@@ -598,6 +602,7 @@ onMounted(() => {
 }
 
 .announcement-card {
+  @include card-style-line; // <--- 应用样式 C
   background-color: white;
   border-radius: $border-radius-base;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
@@ -698,6 +703,7 @@ onMounted(() => {
 }
 
 .event-card {
+  @include card-style-line; // <--- 应用样式 C
   display: flex;
   flex-direction: column;
   background-color: white;

@@ -7,11 +7,11 @@ export const useAppStore = defineStore('app', {
     searchKeyword: '',
     notifications: [],
   }),
-  
+
   actions: {
     toggleMobileMenu() {
       this.isMobileMenuOpen = !this.isMobileMenuOpen
-      
+
       // 移动菜单打开时禁止背景滚动
       if (this.isMobileMenuOpen) {
         document.body.style.overflow = 'hidden'
@@ -19,11 +19,11 @@ export const useAppStore = defineStore('app', {
         document.body.style.overflow = ''
       }
     },
-    
+
     setSearchKeyword(keyword) {
       this.searchKeyword = keyword
     },
-    
+
     addNotification(notification) {
       // 添加通知，并自动设置一个唯一ID
       const id = Date.now()
@@ -32,7 +32,7 @@ export const useAppStore = defineStore('app', {
         ...notification,
         timestamp: new Date(),
       })
-      
+
       // 如果设置了自动关闭时间，则安排自动关闭
       if (notification.autoClose !== false) {
         const timeout = notification.timeout || 3000
@@ -40,22 +40,22 @@ export const useAppStore = defineStore('app', {
           this.removeNotification(id)
         }, timeout)
       }
-      
+
       return id
     },
-    
+
     removeNotification(id) {
       const index = this.notifications.findIndex(n => n.id === id)
       if (index !== -1) {
         this.notifications.splice(index, 1)
       }
     },
-    
+
     clearAllNotifications() {
       this.notifications = []
     }
   },
-  
+
   getters: {
     hasNotifications: (state) => state.notifications.length > 0,
   }
@@ -71,6 +71,7 @@ export const useAuthStore = defineStore('auth', {
       username: '',
       nickname: '',
       email: '',
+      studentId:'',
       college: '',
       bio: '',
       avatarUrl: '',
@@ -117,6 +118,8 @@ export const useAuthStore = defineStore('auth', {
           ...this.user,
           username: data.user.username,
           nickname: data.user.nickname || data.user.username,
+          studentId: data.user.studentId || '',
+          college: data.user.college || '',
           avatarUrl: data.user.avatarUrl || this.user.avatarUrl,
           hic: data.user.hic !== undefined ? data.user.hic : 0
         }
@@ -131,7 +134,9 @@ export const useAuthStore = defineStore('auth', {
       await http.post('/auth/register', {
         username: payload.username,
         password: payload.password,
-        nickname: payload.nickname
+        nickname: payload.nickname || payload.username,
+        studentId: payload.studentId,
+        college: payload.college
       })
       return { success: true }
     },
@@ -140,7 +145,7 @@ export const useAuthStore = defineStore('auth', {
       this.isLoggedIn = false
       this.accessToken = ''
       this.lastTokenCheck = 0
-      this.user = { username: '', nickname: '', email: '', college: '', bio: '', avatarUrl: '', hic: 0 }
+      this.user = { username: '', nickname: '', email: '',studentId:'', college: '', bio: '', avatarUrl: '', hic: 0 }
       this.persist()
     },
 
@@ -154,7 +159,7 @@ export const useAuthStore = defineStore('auth', {
       if (!this.accessToken) {
         return false
       }
-      
+
       try {
         const { default: http } = await import('../utils/http')
         await http.get('/users/me')
@@ -174,7 +179,7 @@ export const useAuthStore = defineStore('auth', {
       if (!this.accessToken) {
         return null
       }
-      
+
       try {
         const payload = JSON.parse(atob(this.accessToken.split('.')[1]))
         return new Date(payload.exp * 1000)
@@ -190,7 +195,7 @@ export const useAuthStore = defineStore('auth', {
       if (!expiration) {
         return true // 无法解析token，认为已过期
       }
-      
+
       const now = new Date()
       return expiration.getTime() <= now.getTime()
     }
@@ -209,45 +214,45 @@ export const useKnowledgeStore = defineStore('knowledge', {
     resourceType: '', // 'book', 'video', 'code', 'project'
     articles: []
   }),
-  
+
   actions: {
     setCategory(category) {
       this.currentCategory = category
     },
-    
+
     setDifficulty(difficulty) {
       this.difficulty = difficulty
     },
-    
+
     setResourceType(type) {
       this.resourceType = type
     },
-    
+
     resetFilters() {
       this.difficulty = ''
       this.resourceType = ''
     }
   },
-  
+
   getters: {
     filteredArticles: (state) => {
       let result = state.articles
-      
+
       // 按分类筛选
       if (state.currentCategory) {
         result = result.filter(article => article.category === state.currentCategory)
       }
-      
+
       // 按难度筛选
       if (state.difficulty) {
         result = result.filter(article => article.difficulty === state.difficulty)
       }
-      
+
       // 按资源类型筛选
       if (state.resourceType) {
         result = result.filter(article => article.resourceType === state.resourceType)
       }
-      
+
       return result
     }
   }
@@ -260,20 +265,20 @@ export const useCompetitionStore = defineStore('competition', {
     teamFilter: '', // 'recruit', 'apply'
     competitionFilter: ''
   }),
-  
+
   actions: {
     setTab(tab) {
       this.currentTab = tab
     },
-    
+
     setTeamFilter(filter) {
       this.teamFilter = filter
     },
-    
+
     setCompetitionFilter(filter) {
       this.competitionFilter = filter
     },
-    
+
     resetFilters() {
       this.teamFilter = ''
       this.competitionFilter = ''

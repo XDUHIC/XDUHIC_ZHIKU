@@ -1,0 +1,121 @@
+@import 'variables';
+
+/*
+ * 通用卡片风格框架（可在亮色/暗色模式复用）
+ * 通过 CSS 变量做主题映射：:root 与 html.dark 分别提供色值。
+ */
+
+// 基础卡片结构 (所有卡片通用)
+@mixin card-base {
+  background-color: var(--card-bg, #ffffff) !important;
+  color: var(--card-text, #333333) !important;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// 风格 A 流光角标 - 适用于 [项目分享/华为竞赛]
+@mixin card-style-neon {
+  @include card-base;
+  border: 1px solid var(--card-border, #e5e5e5) !important;
+
+  &:hover {
+    border-color: var(--card-accent, #E41E2B) !important;
+    box-shadow: -2px -2px 0 var(--card-neon-corner-1, rgba(228, 30, 43, 0.8)),
+    2px 2px 0 var(--card-neon-corner-2, rgba(228, 30, 43, 0.8)),
+    0 0 12px var(--card-neon-glow, rgba(228, 30, 43, 0.3)) !important;
+    animation: card-neon-pulse 1.5s infinite ease-in-out;
+  }
+}
+
+@keyframes card-neon-pulse {
+  0% {
+    box-shadow: -2px -2px 0 var(--card-neon-corner-1, rgba(228, 30, 43, 0.8)),
+    2px 2px 0 var(--card-neon-corner-2, rgba(228, 30, 43, 0.8)),
+    0 0 12px var(--card-neon-glow, rgba(228, 30, 43, 0.3));
+  }
+  50% {
+    box-shadow: -2px -2px 0 var(--card-neon-corner-1-soft, rgba(228, 30, 43, 0.6)),
+    2px 2px 0 var(--card-neon-corner-2-soft, rgba(228, 30, 43, 0.6)),
+    0 0 20px var(--card-neon-glow-strong, rgba(228, 30, 43, 0.5));
+  }
+  100% {
+    box-shadow: -2px -2px 0 var(--card-neon-corner-1, rgba(228, 30, 43, 0.8)),
+    2px 2px 0 var(--card-neon-corner-2, rgba(228, 30, 43, 0.8)),
+    0 0 12px var(--card-neon-glow, rgba(228, 30, 43, 0.3));
+  }
+}
+
+// 风格 B 渐变光晕 - 适用于 [知识库]
+@mixin card-style-gradient-border {
+  @include card-base;
+  border: 1px solid transparent !important;
+  background:
+          linear-gradient(var(--card-bg, #ffffff), var(--card-bg, #ffffff)) padding-box,
+          linear-gradient(135deg,
+                  var(--card-gradient-1, rgba(246, 105, 71, 0.20)),
+                  var(--card-gradient-2, rgba(255, 0, 144, 0.25)),
+                  var(--card-gradient-3, rgba(155, 30, 239, 0.25))) border-box;
+
+  &:hover {
+    background:
+            linear-gradient(var(--card-bg, #ffffff), var(--card-bg, #ffffff)) padding-box,
+            linear-gradient(135deg,
+                    var(--card-gradient-hover-1, rgba(246, 105, 71, 0.65)),
+                    var(--card-gradient-hover-2, rgba(255, 0, 144, 0.55)),
+                    var(--card-gradient-hover-3, rgba(155, 30, 239, 0.55))) border-box;
+    box-shadow: 0 8px 24px var(--card-gradient-shadow, rgba(64, 201, 255, .18));
+  }
+}
+
+// 风格 C 悬停时底部滑出一道亮线 - 适用于 [首页特性/公告]
+@mixin card-style-line {
+  @include card-base;
+  border: 1px solid var(--card-border, #e5e5e5) !important;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background-color: var(--card-accent, #E41E2B);
+    transition: width 0.3s ease;
+  }
+
+  &:hover {
+    border-color: var(--card-border-strong, #cccccc) !important;
+    background-color: var(--card-hover-bg, #f8f9fa) !important;
+
+    &::after {
+      width: 100%;
+    }
+  }
+}
+
+// 风格 D 晶格点阵 - 适用于 [实用工具]
+@mixin card-style-focus {
+  @include card-base;
+  border: 1px solid var(--card-border, #e5e5e5) !important;
+
+  &:hover {
+    border: 1px dotted var(--card-focus-border, rgba(0, 0, 0, 0.45)) !important;
+    box-shadow: 0 0 0 1px var(--card-focus-ring, rgba(0, 0, 0, 0.05)),
+    0 0 16px var(--card-focus-glow, rgba(0, 0, 0, 0.15)) !important;
+  }
+}
+
+// 风格 D 数据适配 - 适用于 [师兄师姐说]
+@mixin card-style-data-accent {
+  @include card-base;
+  border: 1px solid var(--card-data-border, rgba(0, 0, 0, 0.08));
+  border-left: 3px solid var(--card-data-left-border, rgba(255, 212, 118, 0.75));
+
+  &:hover {
+    border-color: var(--card-data-hover-border, rgba(228, 30, 43, 0.45));
+    border-left-color: var(--card-data-left-hover-border, rgba(228, 30, 43, 0.50));
+    box-shadow: 0 3px 5px var(--card-data-shadow, rgba(228, 30, 43, 0.35));
+  }
+}

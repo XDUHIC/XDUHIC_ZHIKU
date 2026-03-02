@@ -109,6 +109,14 @@
                   <h3 class="resource-title">{{ resource.title }}</h3>
                   <p class="resource-description">{{ resource.description }}</p>
 
+                  <div
+                      v-if="resource.hic === 1 && getHicSourceLabel(resource.source)"
+                      class="hic-source-badge"
+                  >
+                    <font-awesome-icon icon="graduation-cap"/>
+                    <span>{{ getHicSourceLabel(resource.source) }}</span>
+                  </div>
+
                   <div class="resource-meta">
                     <div class="meta-item">
                       <font-awesome-icon icon="eye"/>
@@ -559,6 +567,17 @@ const getCategoryTitle = (category) => {
   return titles[category] || '资源'
 }
 
+const getHicSourceLabel = (source) => {
+  if (!source) return ''
+  const sourceMap = {
+    undergrad: '本科生',
+    undergraduate: '本科生',
+    postgrad: '研究生',
+    postgraduate: '研究生'
+  }
+  return sourceMap[source.toLowerCase()] || source
+}
+
 // 处理搜索输入
 const handleSearch = () => {
   currentPage.value = 1
@@ -571,6 +590,9 @@ const handleSearch = () => {
 <style lang="scss" scoped>
 // 导入变量文件
 @import '../styles/variables';
+// 导入卡片样式
+@import '../styles/card-variants';
+
 
 .knowledge-page {
   padding-bottom: $spacing-3xl;
@@ -720,10 +742,10 @@ const handleSearch = () => {
 }
 
 .resource-card {
-  background-color: white;
+  @include card-style-gradient-border; // <--- 应用样式 B
   border-radius: $border-radius-lg;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  /*box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);*/
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 
   &:hover {
@@ -827,6 +849,23 @@ const handleSearch = () => {
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
+}
+
+.hic-source-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: $spacing-md;
+  padding: 4px 10px;
+  border-radius: $border-radius-full;
+  background: rgba(255, 107, 107, 0.12);
+  color: #d4380d;
+  font-size: $font-size-xs;
+  font-weight: 600;
+
+  .svg-inline--fa {
+    font-size: 12px;
+  }
 }
 
 .resource-meta {

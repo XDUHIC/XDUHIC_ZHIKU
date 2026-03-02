@@ -233,7 +233,10 @@ const openArticle = async (article) => {
 </script>
 
 <style lang="scss" scoped>
-@import '../styles/variables.scss';
+// 导入变量文件
+@import '../styles/variables';
+// 导入卡片样式
+@import '../styles/card-variants';
 
 .articles-page {
   min-height: 100vh;
@@ -324,6 +327,7 @@ const openArticle = async (article) => {
 }
 
 .article-card {
+  @include card-style-data-accent; // <--- 应用样式 E
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
 

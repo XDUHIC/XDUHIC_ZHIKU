@@ -1,8 +1,9 @@
 /**
  * 黑暗模式样式代码
- * 包含 4 种不同的卡片交互风格
+ * 导入 5 种不同的卡片交互风格
  */
 
+@import 'card-variants';
 // =============================================================================
 // 核心变量定义
 // =============================================================================
@@ -34,137 +35,6 @@ $markdown-code-bg: rgba(255, 255, 255, 0.08);
 $markdown-pre-bg: #171a22;
 $markdown-table-stripe: #20242d;
 
-// =============================================================================
-// 卡片样式
-// =============================================================================
-
-// 基础卡片结构 (所有卡片通用)
-@mixin card-base {
-  background-color: $bg-dark-card !important;
-  color: $text-color-primary !important;
-  position: relative;
-  overflow: hidden; // 用于裁剪伪元素溢出
-  z-index: 1;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); // 丝滑过渡
-}
-
-// 风格 A 流光角标 - 适用于 [项目分享/华为竞赛]
-@mixin card-style-neon {
-  @include card-base;
-  border: 1px solid $border-color-base !important;
-
-  &:hover {
-    border-color: $primary-color !important;
-    // 四角光效：左上 & 右下
-    box-shadow: -2px -2px 0 rgba($primary-color, 0.8),
-    2px 2px 0 rgba($primary-color, 0.8),
-    0 0 12px rgba($primary-color, 0.3) !important;
-    animation: neon-pulse 1.5s infinite ease-in-out;
-  }
-}
-
-// 微光呼吸动画
-@keyframes neon-pulse {
-  0% {
-    box-shadow: -2px -2px 0 rgba($primary-color, 0.8), 2px 2px 0 rgba($primary-color, 0.8), 0 0 12px rgba($primary-color, 0.3);
-  }
-  50% {
-    box-shadow: -2px -2px 0 rgba($primary-color, 0.6), 2px 2px 0 rgba($primary-color, 0.6), 0 0 20px rgba($primary-color, 0.5);
-  }
-  100% {
-    box-shadow: -2px -2px 0 rgba($primary-color, 0.8), 2px 2px 0 rgba($primary-color, 0.8), 0 0 12px rgba($primary-color, 0.3);
-  }
-}
-
-@keyframes title-radiate-in {
-  0% {
-    opacity: 0;
-    transform: scale(0.9);
-    letter-spacing: 0.4rem;
-    text-shadow: 0 0 0 rgba($primary-color, 0);
-  }
-  60% {
-    opacity: 1;
-    transform: scale(1.08);
-    letter-spacing: 0.16rem;
-    text-shadow: 0 0 30px rgba($primary-color, 0.55);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1.08);
-    letter-spacing: 0.14rem;
-    text-shadow: 0 0 24px rgba($primary-color, 0.45);
-  }
-}
-
-// 风格 B 渐变光晕 - 适用于 [知识库]
-@mixin card-style-gradient-border {
-  @include card-base;
-  border: 1px solid transparent !important;
-  background:
-          linear-gradient($bg-dark-card, $bg-dark-card) padding-box,
-          linear-gradient(135deg, rgba(64,201,255,.55), rgba(128,0,255,.45), rgba(255,64,128,.35)) border-box;
-
-  &:hover {
-    background:
-            linear-gradient($bg-dark-card, $bg-dark-card) padding-box,
-            linear-gradient(135deg, rgba(64,201,255,.85), rgba(128,0,255,.70), rgba(255,64,128,.60)) border-box;
-    box-shadow: 0 8px 24px rgba(64, 201, 255, .18);
-  }
-}
-
-// 风格 C 悬停时底部滑出一道亮线 - 适用于 [首页特性/公告]
-@mixin card-style-line {
-  @include card-base;
-  border: 1px solid $border-color-base !important;
-
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 0%; // 默认宽度为0
-    height: 3px; // 线条高度
-    background-color: $primary-color;
-    transition: width 0.3s ease;
-  }
-
-  &:hover {
-    border-color: $border-color-light !important;
-    background-color: lighten($bg-dark-card, 3%) !important; // 稍微变亮
-
-    // 线条伸展
-    &::after {
-      width: 100%;
-    }
-  }
-}
-
-// 风格 D 晶格点阵 - 适用于 [师兄师姐说/实用工具]
-@mixin card-style-focus {
-  @include card-base;
-  border: 1px solid $border-color-base !important;
-
-  &:hover {
-    border: 1px dotted rgba(255, 255, 255, 0.7) !important;
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05),
-    0 0 16px rgba(255, 255, 255, 0.15) !important;
-    // 保持背景色完全不变，仅边框与阴影
-  }
-}
-
-// 风格 E 左侧强调线
-@mixin card-style-data-accent {
-  @include card-base;
-  border: 1px solid rgba($bg-dark-hover, 0.08);
-  border-left: 3px solid rgba($primary-color, 0.35);
-
-  &:hover {
-    border-color: rgba(196, 174, 231, 0.55);
-    border-left-color: rgba(196, 174, 231, 0.6);
-    box-shadow: 0 3px 5px rgba(196, 174, 231, 0.35);
-  }
-}
 
 // =============================================================================
 // 根样式与全局重置
@@ -175,6 +45,39 @@ html.dark {
   background-color: $bg-dark-base !important;
   color: $text-code !important;
   color-scheme: dark;
+
+  // 卡片样式（复用 card-variants.scss 框架）
+  --card-bg: #{$bg-dark-card};
+  --card-text: #{$text-color-primary};
+  --card-border: #{$border-color-base};
+  --card-border-strong: #{$border-color-light};
+  --card-hover-bg: #{lighten($bg-dark-card, 3%)};
+  --card-accent: #{$primary-color};
+
+  --card-neon-corner-1: #{rgba($primary-color, 0.8)};
+  --card-neon-corner-2: #{rgba($primary-color, 0.8)};
+  --card-neon-corner-1-soft: #{rgba($primary-color, 0.6)};
+  --card-neon-corner-2-soft: #{rgba($primary-color, 0.6)};
+  --card-neon-glow: #{rgba($primary-color, 0.3)};
+  --card-neon-glow-strong: #{rgba($primary-color, 0.5)};
+
+  --card-gradient-1: rgba(64, 201, 255, 0.55);
+  --card-gradient-2: rgba(128, 0, 255, 0.45);
+  --card-gradient-3: rgba(255, 64, 128, 0.35);
+  --card-gradient-hover-1: rgba(64, 201, 255, 0.85);
+  --card-gradient-hover-2: rgba(128, 0, 255, 0.70);
+  --card-gradient-hover-3: rgba(255, 64, 128, 0.60);
+  --card-gradient-shadow: rgba(64, 201, 255, 0.18);
+
+  --card-focus-border: rgba(255, 255, 255, 0.7);
+  --card-focus-ring: rgba(255, 255, 255, 0.05);
+  --card-focus-glow: rgba(255, 255, 255, 0.15);
+
+  --card-data-border: #{rgba($bg-dark-hover, 0.08)};
+  --card-data-left-border: #{rgba($primary-color, 0.35)};
+  --card-data-hover-border: rgba(196, 174, 231, 0.55);
+  --card-data-left-hover-border: rgba(196, 174, 231, 0.6);
+  --card-data-shadow: rgba(196, 174, 231, 0.35);
 
   body {
     background-color: $bg-dark-base !important;
@@ -423,7 +326,7 @@ html.dark {
     background-color: $bg-dark-base;
 
     .article-card{
-      @include card-style-data-accent; // <--- 应用样式 D
+      @include card-style-data-accent; // <--- 应用样式 E
       .article-summary{
         color: $text-color-tertiary;
       }

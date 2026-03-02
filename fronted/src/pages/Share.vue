@@ -390,7 +390,11 @@ onMounted(() => {
 })
 </script>
 
+
 <style lang="scss" scoped>
+// 导入变量文件
+@import '../styles/variables';
+
 .shares-page {
   min-height: 100vh;
   background-color: #f8fafc;

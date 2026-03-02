@@ -367,7 +367,7 @@ const formatDateTime = (dateStr) => {
   }
 
   &.status-ended {
-    background-color: #d9d9d9;
+    background-color: #a593c4;
   }
 }
 
