@@ -21,9 +21,9 @@ public class CorsConfig {
         
         // 允许的域名（生产环境）
         configuration.setAllowedOriginPatterns(Arrays.asList(
-            "http://localhost:*",
-            "https://www.xduhic.top",  // 生产环境域名
-            "https://xduhic.top"  // 生产环境域名
+                "http://localhost:3002",   // 本地联调
+                "https://www.xduhic.top",  // 生产环境域名
+                "https://xduhic.top"  // 生产环境域名
         ));
         
         // 允许的HTTP方法

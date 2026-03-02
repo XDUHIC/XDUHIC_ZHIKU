@@ -20,9 +20,9 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
-                // 生产环境前端地址
+                // 本地前端地址
                 .allowedOriginPatterns(
-                    "http://localhost:*}"
+                    "http://localhost:*"
                 )
                 .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                 .allowedHeaders("Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin")
