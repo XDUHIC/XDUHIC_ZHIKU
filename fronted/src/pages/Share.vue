@@ -158,6 +158,9 @@ const xy1 = new URL('../assets/xy1.jpg', import.meta.url).href
 const xy2 = new URL('../assets/xy2.jpg', import.meta.url).href
 const xy3 = new URL('../assets/xy3.jpg', import.meta.url).href
 const xy4 = new URL('../assets/xy4.jpg', import.meta.url).href
+const xy5 = new URL('../assets/xy5.jpg', import.meta.url).href
+const xy6 = new URL('../assets/xy6.jpg', import.meta.url).href
+const xy7 = new URL('../assets/xy7.jpg', import.meta.url).href
 
 const router = useRouter()
 
@@ -169,7 +172,8 @@ const contributors = [
     avatar: xy1,
     position: '高瓴人工智能学院',
     company: '中国人民大学',
-    actionType: 'internal', 
+    actionType: 'external',
+    target: 'https://mp.weixin.qq.com/s/3B76ZDbCCr5VeY3E_FDNAg'
   },
   {
     id: 2,
@@ -178,47 +182,45 @@ const contributors = [
     position: 'DAI Lab',
     company: '上海交通大学',
     actionType: 'external',
-    target: 'https://mp.weixin.qq.com/s/o2m0MmKCIcXeYnnjV_vhYA'
+    target: 'https://mp.weixin.qq.com/s/1tFuxUnLy__RNsQCpI-pJQ'
   },
   {
     id: 3,
-    name: '陈锦力',
+    name: '张夏瑜',
     avatar: xy3,
-    position: '硬件技术工程师',
-    company: '华为技术有限公司',
-    actionType: 'internal', 
+    position: '通信工程学院',
+    company: '西安电子科技大学',
+    actionType: 'external',
+    target: 'https://mp.weixin.qq.com/s/o2m0MmKCIcXeYnnjV_vhYA'
   },
-  {
+  /*{
     id: 4,
     name: '杨竣博',
     avatar: xy4,
     position: '人工智能学院',
     company: '西安电子科技大学',
     actionType: 'internal',
-  },
-
+  },*/
   {
     id: 5,
     name: '黄彦文',
-    avatar: xy4,
+    avatar: xy5,
     position: '计算机科学与技术学院',
     company: '西安电子科技大学',
     actionType: 'internal',
   },
-
   {
     id: 6,
     name: '亓文',
-    avatar: xy4,
+    avatar: xy6,
     position: '电子工程学院',
     company: '西安电子科技大学',
     actionType: 'internal',
   },
-  
   {
     id: 7,
     name: '高理祥',
-    avatar: xy4,
+    avatar: xy7,
     position: '电子工程学院',
     company: '西安电子科技大学',
     actionType: 'internal',

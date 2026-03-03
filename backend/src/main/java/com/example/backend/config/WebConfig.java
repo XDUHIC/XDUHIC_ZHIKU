@@ -11,6 +11,13 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+/**
+ * Web MVC 配置
+ *
+ * 修复说明：
+ * 1. 移除了通配符 "*"，改为明确指定允许的源
+ * 2. 使用 allowedOriginPatterns 支持端口通配符
+ */
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
@@ -19,29 +26,38 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
+        // API 接口的 CORS 配置
         registry.addMapping("/api/**")
-                // 本地前端地址
                 .allowedOriginPatterns(
-                    "http://localhost:*"
+                        "http://localhost:*",      // 允许 localhost 的所有端口
+                        "http://127.0.0.1:*",      // 允许 127.0.0.1 的所有端口
+                        "https://www.xduhic.top",  // 生产环境
+                        "https://xduhic.top"       // 生产环境
                 )
                 .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
-                .allowedHeaders("Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin")
-                .exposedHeaders("X-Auth-Error", "X-Auth-Error-Detail")
+                .allowedHeaders("*")
+                .exposedHeaders("X-Auth-Error", "X-Auth-Error-Detail", "Authorization")
                 .allowCredentials(true)
                 .maxAge(3600);
-        
-        // 为文件访问单独配置CORS
+
+        // 文件访问的 CORS 配置
         registry.addMapping("/files/**")
                 .allowedOriginPatterns(
-                    "http://localhost:*"
+                        "http://localhost:*",
+                        "http://127.0.0.1:*",
+                        "https://www.xduhic.top",
+                        "https://xduhic.top"
                 )
                 .allowedMethods("GET")
                 .allowedHeaders("*")
                 .maxAge(86400);
-                
+
         registry.addMapping("/uploads/**")
                 .allowedOriginPatterns(
-                    "http://localhost:*"
+                        "http://localhost:*",
+                        "http://127.0.0.1:*",
+                        "https://www.xduhic.top",
+                        "https://xduhic.top"
                 )
                 .allowedMethods("GET")
                 .allowedHeaders("*")
@@ -74,5 +90,3 @@ public class WebConfig implements WebMvcConfigurer {
         return new RestTemplate();
     }
 }
-
-
