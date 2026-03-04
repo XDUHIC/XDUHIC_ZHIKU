@@ -67,6 +67,38 @@
             />
           </div>
 
+          <!-- 发布时间和来源 -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label for="publishTime" class="block text-sm font-medium text-gray-900 mb-2">
+                发布时间 <span class="text-red-500">*</span>
+              </label>
+              <input
+                id="publishTime"
+                v-model="articleForm.publishTime"
+                type="datetime-local"
+                required
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+              <p class="mt-1 text-xs text-gray-500">选择推文在微信发布的日期时间</p>
+            </div>
+
+            <div>
+              <label for="source" class="block text-sm font-medium text-gray-900 mb-2">
+                来源 <span class="text-red-500">*</span>
+              </label>
+              <select
+                id="source"
+                v-model="articleForm.source"
+                required
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="undergrad">本科</option>
+                <option value="postgrad">研究生</option>
+              </select>
+            </div>
+          </div>
+
           <!-- 封面图片上传 -->
           <div>
             <label class="block text-sm font-medium text-gray-900 mb-2">
@@ -149,7 +181,9 @@ const articleForm = reactive({
   title: '',
   summary: '',
   url: '',
-  coverImage: ''
+  coverImage: '',
+  publishTime: '',
+  source: 'undergrad'
 })
 
 // 上传相关
@@ -215,6 +249,8 @@ const resetForm = () => {
   articleForm.summary = ''
   articleForm.url = ''
   articleForm.coverImage = ''
+  articleForm.publishTime = ''
+  articleForm.source = 'undergrad'
   fileList.value = []
   uploadProgress.value = 0
 }
@@ -246,8 +282,10 @@ const submitArticle = async () => {
     const submitData = {
       title: articleForm.title,
       summary: articleForm.summary,
-      url: articleForm.url,
-      coverImage: articleForm.coverImage
+      linkUrl: articleForm.url,
+      coverImage: articleForm.coverImage,
+      publishTime: articleForm.publishTime ? new Date(articleForm.publishTime).toISOString() : null,
+      source: articleForm.source
     }
 
     // 提交到后端
