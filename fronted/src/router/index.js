@@ -13,6 +13,7 @@ const Articles = () => import('../pages/Articles.vue')
 const Share = () => import('../pages/Share.vue')
 const ShareDetail = () => import('../pages/ShareDetail.vue')
 const ShareUpload = () => import('../pages/ShareUpload.vue')
+const ArticlesUpload = () => import('../pages/ArticlesUpload.vue')
 const Announcements = () => import('../pages/Announcements.vue')
 const Events = () => import('../pages/Events.vue')
 const AnnouncementDetail = () => import('../pages/AnnouncementDetail.vue')
@@ -132,6 +133,12 @@ const routes = [
     name: 'Articles',
     component: Articles,
     meta: { title: '华俱微信推文 - 华创智库' }
+  },
+  {
+    path: '/articles/upload',
+    name: 'ArticlesUpload',
+    component: ArticlesUpload,
+    meta: { title: '上传推文 - 华创智库', requiresAuth: true }
   },
   {
     path: '/content/:id',

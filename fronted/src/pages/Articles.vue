@@ -96,6 +96,25 @@
         </div>
       </section>
 
+      <!-- 推文上传 -->
+      <section class="upload-section">
+        <div class="container">
+          <div class="upload-card">
+            <div class="upload-content">
+              <div class="upload-text">
+                <h3 class="upload-title">上传推文</h3>
+                <p class="upload-description">
+                  微信公众号推文上传，让更多人看到华创内容！
+                </p>
+              </div>
+              <el-button type="primary" size="large" @click="goToUpload">
+                上传
+              </el-button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- 订阅提示 -->
       <section class="subscription-section">
         <div class="container">
@@ -114,16 +133,21 @@
           </div>
         </div>
       </section>
+
+
     </div>
   </MainLayout>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import MainLayout from '../layouts/MainLayout.vue'
 import { getArticles, incrementArticleView } from '../api/articles'
 import { config } from '../utils/config.js'
+
+const router = useRouter()
 
 // 状态变量
 const loading = ref(false)
@@ -196,6 +220,11 @@ const handleImageError = (event) => {
   console.log('图片加载失败:', event.target.src)
   // 可以设置默认图片
   // event.target.src = '/default-article-image.jpg'
+}
+
+// 跳转到上传页面
+const goToUpload = () => {
+  router.push('/articles/upload')
 }
 
 // 生命周期钩子
@@ -516,5 +545,56 @@ const openArticle = async (article) => {
   max-width: 400px;
   margin: 0 auto;
   margin-bottom: $spacing-lg;
+}
+
+/* 推文上传引导 */
+.upload-section {
+  padding: 60px 0;
+  background: white;
+}
+
+.upload-card {
+  background: white;
+  border-radius: 16px;
+  padding: 40px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.upload-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+}
+
+.upload-text {
+  flex: 1;
+  text-align: left;
+}
+
+.upload-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 8px;
+}
+
+.upload-description {
+  color: #718096;
+  line-height: $line-height-normal;
+  margin: 0;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .upload-content {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .upload-text {
+    text-align: center;
+  }
 }
 </style>
