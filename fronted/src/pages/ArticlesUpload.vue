@@ -191,9 +191,19 @@ const fileList = ref([])
 const uploadProgress = ref(0)
 const submitting = ref(false)
 
-const uploadUrl = computed(() => '/api/files/upload')
+const uploadUrl = computed(() => '/api/upload/image')
 const uploadHeaders = computed(() => {
-  const token = localStorage.getItem('token')
+  // 从 authState 中获取 token
+  let token = ''
+  try {
+    const raw = localStorage.getItem('authState')
+    if (raw) {
+      const parsed = JSON.parse(raw)
+      token = parsed.accessToken || ''
+    }
+  } catch (e) {
+    console.error('获取token失败:', e)
+  }
   return token ? { 'Authorization': `Bearer ${token}` } : {}
 })
 
@@ -223,11 +233,21 @@ const handleUploadProgress = (event) => {
 // 图片上传成功
 const handleImageUploadSuccess = (response) => {
   uploadProgress.value = 100
-  if (response.success) {
-    articleForm.coverImage = response.data.url || response.data.path
-    ElMessage.success('图片上传成功!')
+  // 后端可能直接返回数据或包装在data中
+  const data = response.data || response
+  if (data && data.success) {
+    // 尝试多种可能的URL路径
+    let imageUrl = data.url || data.path || (data.data && data.data.url) || ''
+    // 去除可能存在的引号，确保是纯路径字符串
+    if (imageUrl) {
+      imageUrl = imageUrl.replace(/^["']|["']$/g, '')
+      articleForm.coverImage = imageUrl
+      ElMessage.success('图片上传成功!')
+    } else {
+      ElMessage.error('上传成功但无法获取图片地址')
+    }
   } else {
-    ElMessage.error(response.message || '图片上传失败!')
+    ElMessage.error((data && data.message) || '图片上传失败!')
   }
 }
 
@@ -278,18 +298,47 @@ const submitArticle = async () => {
   try {
     submitting.value = true
 
-    // 准备提交数据
+    // 准备提交数据 - 格式化日期为后端可解析的格式
+    let formattedPublishTime = null
+    if (articleForm.publishTime) {
+      const date = new Date(articleForm.publishTime)
+      // 格式化为 yyyy-MM-dd HH:mm:ss
+      const year = date.getFullYear()
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const day = String(date.getDate()).padStart(2, '0')
+      const hours = String(date.getHours()).padStart(2, '0')
+      const minutes = String(date.getMinutes()).padStart(2, '0')
+      const seconds = String(date.getSeconds()).padStart(2, '0')
+      formattedPublishTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+    }
+
     const submitData = {
       title: articleForm.title,
       summary: articleForm.summary,
       linkUrl: articleForm.url,
       coverImage: articleForm.coverImage,
-      publishTime: articleForm.publishTime ? new Date(articleForm.publishTime).toISOString() : null,
+      publishTime: formattedPublishTime,
       source: articleForm.source
     }
 
+    // 获取token
+    let token = ''
+    try {
+      const raw = localStorage.getItem('authState')
+      if (raw) {
+        const parsed = JSON.parse(raw)
+        token = parsed.accessToken || ''
+      }
+    } catch (e) {
+      console.error('获取token失败:', e)
+    }
+
     // 提交到后端
-    const response = await axios.post('/api/articles', submitData)
+    const response = await axios.post('/api/articles', submitData, {
+      headers: {
+        'Authorization': token ? `Bearer ${token}` : ''
+      }
+    })
 
     if (response.data.success) {
       ElMessage.success('推文上传成功!')
