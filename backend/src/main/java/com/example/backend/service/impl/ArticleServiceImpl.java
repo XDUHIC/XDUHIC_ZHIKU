@@ -62,6 +62,61 @@ public class ArticleServiceImpl implements ArticleService {
         }
         return articleMapper.findById(id);
     }
+
+    @Override
+    public Article save(Article article) {
+        // 去除 coverImage 可能存在的首尾双引号
+        if (article.getCoverImage() != null) {
+            article.setCoverImage(normalizeParam(article.getCoverImage()));
+        }
+
+        // 保存文章，使用数据库自增ID
+        articleMapper.insert(article);
+
+        // 如果有封面图片路径，需要将其移动到标准路径
+        if (article.getCoverImage() != null && !article.getCoverImage().isEmpty()) {
+            moveCoverImageToStandardPath(article);
+        }
+
+        return article;
+    }
+
+    private void moveCoverImageToStandardPath(Article article) {
+        try {
+            String originalPath = article.getCoverImage();
+            // 构建新的标准路径: /uploads/articles/images/{id}.jpg
+            // 注意：现在 id 是手动设置的，文件命名使用文章 id
+            String newFileName = article.getId() + ".jpg";
+            String standardPath = "/uploads/articles/images/" + newFileName;
+            log.info("moveCoverImageToStandardPath() - 文章ID: {}, 原路径: {}, 新标准路径: {}",
+                    article.getId(), originalPath, standardPath);
+
+            // 获取实际文件路径
+            java.nio.file.Path sourcePath = java.nio.file.Paths.get(System.getProperty("user.dir"), originalPath.startsWith("/") ? originalPath.substring(1) : originalPath);
+            java.nio.file.Path targetDir = java.nio.file.Paths.get(System.getProperty("user.dir"), "uploads/articles/images");
+            java.nio.file.Path targetPath = targetDir.resolve(newFileName);
+
+            // 确保目标目录存在
+            if (!java.nio.file.Files.exists(targetDir)) {
+                java.nio.file.Files.createDirectories(targetDir);
+            }
+
+            // 移动文件
+            if (java.nio.file.Files.exists(sourcePath)) {
+                java.nio.file.Files.move(sourcePath, targetPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                log.info("封面图片已移动到: {}", targetPath);
+
+                // 更新数据库中的路径
+                article.setCoverImage(standardPath);
+                log.debug("updateCoverImage() - 更新路径: [{}]", standardPath);
+                articleMapper.updateCoverImage(article.getId(), standardPath);
+            } else {
+                log.warn("原始封面图片不存在: {}", sourcePath);
+            }
+        } catch (Exception e) {
+            log.error("移动封面图片失败", e);
+        }
+    }
 }
 
 
