@@ -52,6 +52,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/", "/api/projects", "/api/projects/**", "/api/tools", "/api/tools/**", "/api/articles", "/api/articles/**", "/api/senior-shares", "/api/senior-shares/**", "/api/resources", "/api/resources/**", "/api/competitions", "/api/competitions/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/projects/*/view", "/api/resources/*/view", "/api/competitions/*/view", "/api/tools/*/view", "/api/articles/*/view", "/api/senior-shares/*/view").permitAll()
                         .requestMatchers("/api/upload/**").authenticated()
+                        .requestMatchers("/api/organization").permitAll()
                         .anyRequest().authenticated()
                 )
 
