@@ -331,6 +331,14 @@ html.dark {
         color: $text-color-tertiary;
       }
     }
+
+    // 上传推文区域
+    .upload-section{
+      background: $bg-dark-section;
+      .upload-card{
+        @include card-style-neon; // 霓虹效果，强调"参与";
+      }
+    }
   }
 
 
