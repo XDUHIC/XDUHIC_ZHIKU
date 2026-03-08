@@ -143,6 +143,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAppStore, useAuthStore } from '../stores'
 import { config } from '../utils/config.js'
+import { ElMessage } from 'element-plus'
 
 const router = useRouter()
 const appStore = useAppStore()
@@ -187,6 +188,8 @@ const avatarUrl = computed(() => {
 const handleLogout = () => {
   authStore.logout()
   closeMobileMenu()
+  ElMessage.success('\u5DF2\u9000\u51FA\u767B\u5F55')
+  appStore.addNotification({ type: 'success', message: '\u5DF2\u9000\u51FA\u767B\u5F55' })
   router.push('/portal')
 }
 
