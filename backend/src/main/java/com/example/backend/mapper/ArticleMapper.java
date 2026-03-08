@@ -22,7 +22,14 @@ public interface ArticleMapper {
     // 测试方法：简化的搜索查询
     @Select("SELECT id, title, summary FROM articles WHERE title LIKE CONCAT('%', #{search}, '%') ORDER BY id LIMIT 5")
     List<Article> testSearch(@Param("search") String search);
+
+    // 插入新文章
+    @Insert("INSERT INTO articles (title, summary, cover_image, view_count, link_url, publish_time, source, created_at) " +
+            "VALUES (#{title}, #{summary}, #{coverImage}, 0, #{linkUrl}, #{publishTime}, #{source}, NOW())")
+    @Options(useGeneratedKeys = true, keyProperty = "id")
+    int insert(Article article);
+
+    // 更新封面图片路径
+    @Update("UPDATE articles SET cover_image = #{coverImage} WHERE id = #{id}")
+    int updateCoverImage(@Param("id") Long id, @Param("coverImage") String coverImage);
 }
-
-
-

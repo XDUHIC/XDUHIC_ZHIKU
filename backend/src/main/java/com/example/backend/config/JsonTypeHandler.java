@@ -20,7 +20,13 @@ public class JsonTypeHandler extends BaseTypeHandler<Object> {
     @Override
     public void setNonNullParameter(PreparedStatement ps, int i, Object parameter, JdbcType jdbcType) throws SQLException {
         try {
-            ps.setString(i, objectMapper.writeValueAsString(parameter));
+            // 如果参数是 String 类型，直接存储原始值，不进行 JSON 序列化
+            // 这避免了字符串被加上额外的引号（如 /uploads/images/xxx.png 变成 "/uploads/images/xxx.png"）
+            if (parameter instanceof String) {
+                ps.setString(i, (String) parameter);
+            } else {
+                ps.setString(i, objectMapper.writeValueAsString(parameter));
+            }
         } catch (JsonProcessingException e) {
             throw new SQLException("Error converting object to JSON", e);
         }

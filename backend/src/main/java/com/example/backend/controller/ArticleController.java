@@ -45,6 +45,18 @@ public class ArticleController {
         articleService.getById(id, true);
         return ResponseEntity.ok(ApiResponse.success());
     }
+
+    @PostMapping
+    public ResponseEntity<ApiResponse<Article>> create(@RequestBody Article article) {
+        try {
+            System.out.println("Received article: " + article);
+            Article savedArticle = articleService.save(article);
+            return ResponseEntity.ok(ApiResponse.success(savedArticle));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.ok(ApiResponse.error("保存失败: " + e.getMessage()));
+        }
+    }
 }
 
 
