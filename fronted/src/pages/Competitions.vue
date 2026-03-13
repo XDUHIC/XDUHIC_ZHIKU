@@ -74,18 +74,18 @@
           </div>
 
           <!-- 分页 -->
-          <div class="pagination-container" v-if="filteredCompetitions.length > 0">
+          <div class="pagination-container" v-if="totalCount > 0">
             <el-pagination
                 v-model="currentPage"
                 :page-size="pageSize"
-                :total="filteredCompetitions.length"
+                :total="totalCount"
                 layout="prev, pager, next"
                 @current-change="handlePageChange"
             />
           </div>
 
           <!-- 暂无数据 -->
-          <div v-if="filteredCompetitions.length === 0" class="empty-container">
+          <div v-if="!loading && competitions.length === 0" class="empty-container">
             <font-awesome-icon icon="trophy" class="empty-icon" />
             <h2 class="empty-title">暂无竞赛</h2>
             <p class="empty-description">
@@ -108,93 +108,90 @@ import { getCompetitions, incrementCompetitionView } from '../api/competitions'
 
 const router = useRouter()
 
+// 搜索防抖，避免每次按键都请求
+let searchTimer = null
+const debouncedFetch = () => {
+  if (searchTimer) clearTimeout(searchTimer)
+  searchTimer = setTimeout(() => {
+    currentPage.value = 1
+    fetchCompetitions()
+  }, 300)
+}
+
 // 竞赛信息部分的数据
 const competitionStatus = ref('')
 const searchQuery = ref('')
 const competitions = ref([])
+const totalCount = ref(0)
 const loading = ref(false)
 const currentPage = ref(1)
 const pageSize = ref(10)
 
-// 计算过滤后的竞赛
-const filteredCompetitions = computed(() => {
-  let result = [...competitions.value]
+// 后端已支持 search/status 分页，直接使用接口返回的列表和总数
+const filteredCompetitions = computed(() => [...competitions.value])
 
-  // 前端状态筛选（确保筛选功能正常工作）
-  if (competitionStatus.value) {
-    result = result.filter(competition => competition.status === competitionStatus.value)
-  }
-
-  // 前端搜索筛选
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    result = result.filter(competition =>
-        competition.title.toLowerCase().includes(query) ||
-        competition.description.toLowerCase().includes(query)
-    )
-  }
-
-  return result
-})
-
-// 计算分页后的竞赛
-const paginatedCompetitions = computed(() => {
-  const start = (currentPage.value - 1) * pageSize.value
-  const end = start + pageSize.value
-  return filteredCompetitions.value.slice(start, end)
-})
+// 当前页展示的竞赛（后端分页，一页即当前页数据）
+const paginatedCompetitions = computed(() => filteredCompetitions.value)
 
 // 生命周期钩子
 onMounted(() => {
   fetchCompetitions()
 })
 
-// API调用方法
+// API调用方法：使用后端 search/status 参数，搜索和筛选时页面会更新
 const fetchCompetitions = async () => {
   try {
     loading.value = true
     // 获取所有竞赛数据，让前端进行筛选
     const params = {
-      page: 1,
-      size: 1000
+      page: currentPage.value,
+      size: pageSize.value,
+      status: competitionStatus.value || undefined,
+      search: searchQuery.value?.trim() || undefined
     }
 
     const response = await getCompetitions(params)
-    // 适配后端ApiResponse<PageResponse<Competition>>结构
+    // 适配后端 ApiResponse<PageResponse<Competition>>：data.data 为列表，data.total 为总数
     const payload = response.data
-    const listData = payload?.data?.data || payload?.data || []
+    const pageData = payload?.data
+    const listData = Array.isArray(pageData?.data) ? pageData.data : (Array.isArray(payload?.data) ? payload.data : [])
+    const total = pageData?.total ?? 0
+
     competitions.value = listData.map(item => ({
       id: item.id,
-      title: item.title,
-      description: item.description,
-      status: item.status || item.competitionStatus,
+      title: item.title ?? '',
+      description: item.description ?? '',
+      status: item.status ?? item.competitionStatus ?? '',
       startTime: item.startTime,
       endTime: item.endTime,
       officialLink: item.officialLink,
-      viewCount: item.viewCount || 0
+      viewCount: item.viewCount ?? 0
     }))
+    totalCount.value = total
   } catch (error) {
     console.error('获取竞赛数据失败:', error)
     competitions.value = []
+    totalCount.value = 0
   } finally {
     loading.value = false
   }
 }
 
-// 方法
+// 状态筛选：重置到第一页并重新请求后端
 const filterCompetitions = () => {
   // 前端筛选，重置页码
   currentPage.value = 1
+  fetchCompetitions()
 }
 
+// 搜索：防抖后请求后端，使页面随搜索结果更新
 const handleSearch = () => {
-  // 前端搜索，重置页码
-  currentPage.value = 1
+  debouncedFetch()
 }
 
 const handlePageChange = (page) => {
   currentPage.value = page
-  // 滚动到页面顶部
+  fetchCompetitions()
   window.scrollTo({
     top: 0,
     behavior: 'smooth'

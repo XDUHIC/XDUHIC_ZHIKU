@@ -65,7 +65,6 @@
                   accept=".md"
                   @change="handleFileChange"
                   class="hidden"
-                  required
               />
               <div v-if="!form.documentFile" @click="$refs.fileInput.click()" class="cursor-pointer">
                 <svg class="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -228,12 +227,17 @@ export default {
         formData.append('documentFile', this.form.documentFile)
 
         const result = await createProject(formData)
+        const payload = result?.data
+        if (payload && payload.success === false) {
+          throw new Error(payload.message || 'Create project failed')
+        }
         alert('Repository created successfully!')
         // 添加时间戳参数强制刷新，避免缓存问题
         this.$router.push('/projects?t=' + Date.now())
       } catch (error) {
         console.error('Failed to create repository:', error)
-        alert('Failed to create repository. Please try again.')
+        const message = error?.response?.data?.message || error?.message || 'Failed to create repository. Please try again.'
+        alert(message)
       } finally {
         this.isSubmitting = false
       }

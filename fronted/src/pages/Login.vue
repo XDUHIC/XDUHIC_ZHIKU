@@ -153,18 +153,16 @@ function onSubmit() {
       const res = await authStore.login({ username: form.username, password: form.password })
       submitting.value = false
       if (res && res.success) {
-        appStore.addNotification({ type: 'success', message: res.message || '\u767B\u5F55\u6210\u529F' })
+        appStore.addNotification({ type: 'success', message: '登录成功' })
+        // 支持从 ?redirect=xxx 回跳，如果没有重定向参数则跳转到portal
         const redirect = new URLSearchParams(location.search).get('redirect') || '/portal'
         router.replace(redirect)
       } else {
-        const msg = res?.message || '\u767B\u5F55\u5931\u8D25\uFF0C\u8BF7\u68C0\u67E5\u7528\u6237\u540D\u548C\u5BC6\u7801'
-        ElMessage.error(msg)
-        appStore.addNotification({ type: 'error', message: msg })
+        appStore.addNotification({ type: 'error', message: '登录失败' })
       }
     } catch (e) {
       submitting.value = false
-      const msg = e?.response?.data?.message || e?.message || '\u767B\u5F55\u5931\u8D25\uFF0C\u8BF7\u7A0D\u540E\u91CD\u8BD5'
-      ElMessage.error(msg)
+      const msg = '用户名或密码错误'
       appStore.addNotification({ type: 'error', message: msg })
     }
   })

@@ -134,7 +134,6 @@
         </div>
       </section>
 
-
     </div>
   </MainLayout>
 </template>
@@ -147,9 +146,9 @@ import MainLayout from '../layouts/MainLayout.vue'
 import { getArticles, incrementArticleView } from '../api/articles'
 import { config } from '../utils/config.js'
 
-const router = useRouter()
 
 // 状态变量
+const router = useRouter()
 const loading = ref(false)
 const searchQuery = ref('')
 const currentPage = ref(1)
@@ -221,12 +220,10 @@ const handleImageError = (event) => {
   // 可以设置默认图片
   // event.target.src = '/default-article-image.jpg'
 }
-
 // 跳转到上传页面
 const goToUpload = () => {
   router.push('/articles/upload')
 }
-
 // 生命周期钩子
 onMounted(() => {
   fetchArticles()

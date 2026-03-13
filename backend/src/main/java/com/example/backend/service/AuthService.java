@@ -3,12 +3,13 @@ package com.example.backend.service;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.beans.factory.annotation.Value;
 
 import com.example.backend.dto.AuthDtos;
 import com.example.backend.entity.User;
+import com.example.backend.exception.BusinessException;
 import com.example.backend.mapper.UserMapper;
 import com.example.backend.security.JwtService;
 
@@ -22,16 +23,18 @@ public class AuthService {
 
     @Value("${app.hic.auth.key:}")
     private String hicAuthKey;
+
     @Transactional
     //用户注册：1、增加学院和学号两项2、判断学院是否存在3、判断学号是否是本校学生
     public void register(AuthDtos.RegisterReq req) {
         if (userMapper.findByUsername(req.getUsername()) != null) {
-            throw new RuntimeException("用户名已存在");
+            throw new BusinessException(400, "用户名已存在");
         }
         //新增-检查学号是否已存在
         if(userMapper.findByStudentId(req.getStudentId())!=null){
             throw new RuntimeException("该学号已被注册");
         }
+
         User u = new User();
         u.setUsername(req.getUsername());
         u.setPassword(req.getPassword());
@@ -44,36 +47,24 @@ public class AuthService {
         u.setStatus(1);
         userMapper.insert(u);
     }
-//    public void register(AuthDtos.RegisterReq req) {
-//        if (userMapper.findByUsername(req.getUsername()) != null) {
-//            throw new RuntimeException("用户名已存在");
-//        }
-//        User u = new User();
-//        u.setUsername(req.getUsername());
-//        u.setPassword(req.getPassword());
-//        // 使用传入的昵称，如果为空则使用用户名作为默认昵称
-//        u.setNickname(req.getNickname() != null && !req.getNickname().trim().isEmpty()
-//                      ? req.getNickname().trim() : req.getUsername());
-//        u.setStatus(1);
-//        userMapper.insert(u);
-//    }
-
 
     public Map<String, Object> login(AuthDtos.LoginReq req) {
         User u = userMapper.findByUsername(req.getUsername());
         if (u == null || u.getStatus() != 1) {
-            throw new RuntimeException("用户不存在或被禁用");
+            throw new BusinessException(401, "用户不存在或被禁用");
         }
+
         if (!req.getPassword().equals(u.getPassword())) {
-            throw new RuntimeException("用户名或密码错误");
+            throw new BusinessException(401, "用户名或密码错误");
         }
         
         // 更新最后登录时间
         userMapper.updateLastLoginTime(u.getId());
-        
+
         String token = jwtService.generateToken(u.getId(), u.getUsername(), "user");
         Map<String, Object> resp = new HashMap<>();
         resp.put("accessToken", token);
+
         Map<String, Object> user = new HashMap<>();
         user.put("id", u.getId());
         user.put("username", u.getUsername());
@@ -81,6 +72,7 @@ public class AuthService {
         user.put("avatarUrl", u.getAvatarUrl());
         user.put("hic", u.getHic() != null ? u.getHic() : 0);
         resp.put("user", user);
+
         return resp;
     }
 
@@ -106,22 +98,23 @@ public class AuthService {
         }
         // 读取配置的认证密钥并进行比较
         if (hicAuthKey == null || hicAuthKey.isEmpty()) {
-            throw new RuntimeException("系统未配置HIC认证密钥");
+            throw new BusinessException(500, "系统未配置HIC认证密钥");
         }
+
         if (!key.equals(hicAuthKey)) {
             return false;
         }
+
         User u = userMapper.findByUsername(username);
         if (u == null) {
-            throw new RuntimeException("用户不存在");
+            throw new BusinessException(404, "用户不存在");
         }
         // 已认证则直接返回true
         if (u.getHic() != null && u.getHic() == 1) {
             return true;
         }
+
         userMapper.updateHicStatus(u.getId(), 1);
         return true;
     }
 }
-
-

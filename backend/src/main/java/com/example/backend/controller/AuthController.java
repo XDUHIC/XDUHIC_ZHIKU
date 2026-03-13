@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.backend.dto.AuthDtos;
+import com.example.backend.exception.BusinessException;
 import com.example.backend.service.AuthService;
 import com.example.backend.service.SecurityAuditService;
 
@@ -52,6 +53,13 @@ public class AuthController {
         } catch (Exception e) {
             securityAuditService.logSuspiciousActivity("REGISTRATION_FAILURE",
                     "Registration failed for username: " + req.getUsername(), request);
+            if (e instanceof BusinessException) {
+                log.warn("Register failed. username={}, studentId={}, reason={}",
+                        req.getUsername(), req.getStudentId(), e.getMessage());
+            } else {
+                log.error("Register failed unexpectedly. username={}, studentId={}",
+                        req.getUsername(), req.getStudentId(), e);
+            }
             throw e;
         }
     }
@@ -64,6 +72,11 @@ public class AuthController {
             return ResponseEntity.ok(Map.of("code", 0, "message", "OK", "data", data));
         } catch (Exception e) {
             securityAuditService.logLoginFailure(req.getUsername(), request, e.getMessage());
+            if (e instanceof BusinessException) {
+                log.warn("Login failed. username={}, reason={}", req.getUsername(), e.getMessage());
+            } else {
+                log.error("Login failed unexpectedly. username={}", req.getUsername(), e);
+            }
             throw e;
         }
     }

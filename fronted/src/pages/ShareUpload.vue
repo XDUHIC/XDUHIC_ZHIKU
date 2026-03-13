@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="min-h-screen bg-gray-50">
     <!-- 分享上传页面头部 -->
     <div class="bg-white border-b border-gray-200">
@@ -62,12 +62,11 @@
                 ref="uploadRef"
                 class="upload-dragger"
                 drag
-                :action="uploadUrl"
-                :headers="uploadHeaders"
+                :auto-upload="false"
+                :show-file-list="false"
                 :before-upload="beforeUpload"
-                :on-success="handleUploadSuccess"
-                :on-error="handleUploadError"
-                :on-progress="handleUploadProgress"
+                :on-change="handleFileChange"
+                :on-remove="handleFileRemove"
                 :file-list="fileList"
                 :limit="1"
                 :on-exceed="handleExceed"
@@ -84,7 +83,7 @@
                   <svg class="w-8 h-8 mx-auto mb-2" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                   </svg>
-                  <p class="text-sm font-medium">文件已上传</p>
+                  <p class="text-sm font-medium">文件已选择</p>
                 </div>
               </el-upload>
               
@@ -129,11 +128,11 @@
               重置
             </button>
             <button
-              type="button"
-              disabled
-              class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-400 cursor-not-allowed opacity-50"
+              type="submit"
+              :disabled="submitting"
+              class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              暂未开放
+              {{ submitting ? '提交中...' : '提交分享' }}
             </button>
           </div>
         </form>
@@ -143,23 +142,21 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import MainLayout from '@/layouts/MainLayout.vue'
 import axios from 'axios'
-import { config } from '../utils/config.js'
 
 const router = useRouter()
-const shareFormRef = ref()
 const uploadRef = ref()
+const selectedFile = ref(null)
 
 // 表单数据
 const shareForm = reactive({
   title: '',
   category: '',
   content: '',
-  textUrl: ''
+  tags: ''
 })
 
 // 分类选项
@@ -170,29 +167,30 @@ const categories = [
   { label: '其他', value: 'others' }
 ]
 
-// 表单验证规则
-const shareRules = {
-  title: [
-    { required: true, message: '请输入经验标题', trigger: 'blur' },
-    { min: 5, max: 100, message: '标题长度应在 5 到 100 个字符之间', trigger: 'blur' }
-  ],
-  category: [
-    { required: true, message: '请选择经验类型', trigger: 'change' }
-  ]
-}
-
-// 上传相关
 const fileList = ref([])
 const uploadProgress = ref(0)
 const submitting = ref(false)
 
-  const uploadUrl = computed(() => '/api/files/upload')
-const uploadHeaders = computed(() => {
-  const token = localStorage.getItem('token')
-  return token ? { 'Authorization': `Bearer ${token}` } : {}
-})
+const getAccessToken = () => {
+  let token = ''
+  try {
+    const raw = localStorage.getItem('authState')
+    if (raw) {
+      const parsed = JSON.parse(raw)
+      token = parsed.accessToken || parsed.token || ''
+    }
+  } catch (e) {
+    console.error('获取 token 失败:', e)
+  }
 
-// 上传前检查
+  if (!token) {
+    token = localStorage.getItem('token') || ''
+  }
+
+  return token
+}
+
+// 文件校验
 const beforeUpload = (file) => {
   const isValidType = file.name.toLowerCase().endsWith('.md')
   const isLt10M = file.size / 1024 / 1024 < 10
@@ -205,95 +203,103 @@ const beforeUpload = (file) => {
     ElMessage.error('上传文件大小不能超过 10MB!')
     return false
   }
-  
-  uploadProgress.value = 0
+
   return true
 }
 
-// 上传进度
-const handleUploadProgress = (event) => {
-  uploadProgress.value = Math.round((event.loaded / event.total) * 100)
-}
+const handleFileChange = (uploadFile, uploadFiles) => {
+  const raw = uploadFile?.raw
+  if (!raw) return
 
-// 上传成功
-const handleUploadSuccess = (response) => {
+  selectedFile.value = raw
+  fileList.value = uploadFiles.slice(-1)
   uploadProgress.value = 100
-  if (response.success) {
-    shareForm.textUrl = response.data.url || response.data.path
-    ElMessage.success('文件上传成功!')
-  } else {
-    ElMessage.error(response.message || '文件上传失败!')
-  }
 }
 
-// 上传失败
-const handleUploadError = (error) => {
-  uploadProgress.value = 0
-  console.error('Upload error:', error)
-  ElMessage.error('文件上传失败，请重试!')
-}
-
-// 文件数量超限
-const handleExceed = () => {
-  ElMessage.warning('只能上传一个文件!')
-}
-
-// 重置表单
-const resetForm = () => {
-  shareFormRef.value?.resetFields()
+const handleFileRemove = () => {
+  selectedFile.value = null
   fileList.value = []
   uploadProgress.value = 0
-  shareForm.textUrl = ''
 }
 
-// 提交分享
+const handleExceed = () => {
+  ElMessage.warning('只能上传一个文件，请先移除当前文件再选择')
+}
+
+const resetForm = () => {
+  shareForm.title = ''
+  shareForm.category = ''
+  shareForm.content = ''
+  shareForm.tags = ''
+  selectedFile.value = null
+  fileList.value = []
+  uploadProgress.value = 0
+  uploadRef.value?.clearFiles?.()
+}
+
+const validateForm = () => {
+  if (!shareForm.title.trim()) {
+    ElMessage.error('请输入分享标题')
+    return false
+  }
+  if (!shareForm.category) {
+    ElMessage.error('请选择分享分类')
+    return false
+  }
+  if (!selectedFile.value) {
+    ElMessage.error('请先选择 Markdown 文档')
+    return false
+  }
+  return true
+}
+
 const submitShare = async () => {
+  if (submitting.value) return
+  if (!validateForm()) return
+
   try {
-    // 表单验证
-    await shareFormRef.value?.validate()
-    
     submitting.value = true
-    
-    // 准备提交数据
-    const submitData = {
-      title: shareForm.title,
-      category: shareForm.category,
-      content: shareForm.content || '',
-      textUrl: shareForm.textUrl || ''
+
+    const formData = new FormData()
+    formData.append('title', shareForm.title.trim())
+    formData.append('content', shareForm.content || '')
+    formData.append('category', shareForm.category || 'others')
+    formData.append('tags', shareForm.tags || '')
+    formData.append('documentFile', selectedFile.value)
+
+    const token = getAccessToken()
+    const headers = token ? { Authorization: `Bearer ${token}` } : {}
+
+    const response = await axios.post('/api/senior-shares', formData, { headers })
+    const body = response?.data || {}
+    const isSuccess = body.success === true || body.code === 0
+
+    if (!isSuccess) {
+      throw new Error(body.message || '分享失败，请重试!')
     }
-    
-    // 提交到后端
-    const response = await axios.post('/api/senior-shares', submitData)
-    
-    if (response.data.success) {
-      ElMessage.success('经验分享成功!')
-      
-      // 询问是否查看分享
-      const result = await ElMessageBox.confirm(
-        '经验分享成功！是否立即查看你的分享？',
-        '分享成功',
-        {
-          confirmButtonText: '查看分享',
-          cancelButtonText: '返回列表',
-          type: 'success'
-        }
-      ).catch(() => 'cancel')
-      
-      if (result === 'confirm') {
-        router.push(`/share/${response.data.data.id}`)
-      } else {
-        router.push('/share')
+
+    ElMessage.success('经验分享成功!')
+
+    const shareId = body?.data?.id || body?.id
+    const result = await ElMessageBox.confirm(
+      '经验分享成功！是否立即查看你的分享？',
+      '分享成功',
+      {
+        confirmButtonText: '查看分享',
+        cancelButtonText: '返回列表',
+        type: 'success'
       }
+    ).catch(() => 'cancel')
+
+    if (result === 'confirm' && shareId) {
+      router.push(`/share/${shareId}`)
     } else {
-      ElMessage.error(response.data.message || '分享失败，请重试!')
+      router.push('/share')
     }
   } catch (error) {
     console.error('Submit error:', error)
-    if (error.response?.data?.message) {
-      ElMessage.error(error.response.data.message)
-    } else {
-      ElMessage.error('分享失败，请重试!')
-    }
+    const message = error?.response?.data?.message || error?.message || '分享失败，请重试!'
+    ElMessage.error(message)
   } finally {
     submitting.value = false
   }

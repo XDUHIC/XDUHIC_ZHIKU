@@ -4,6 +4,8 @@ import com.example.backend.dto.response.ApiResponse;
 import com.example.backend.dto.response.PageResponse;
 import com.example.backend.entity.Article;
 import com.example.backend.service.ArticleService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,7 +14,9 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/articles")
 public class ArticleController {
 
-    private ArticleService articleService;
+    private static final Logger logger = LoggerFactory.getLogger(ArticleController.class);
+
+    private final ArticleService articleService;
 
     @Autowired
     public ArticleController(ArticleService articleService) {
@@ -46,17 +50,17 @@ public class ArticleController {
         return ResponseEntity.ok(ApiResponse.success());
     }
 
-    @PostMapping
+    @PostMapping({"", "/"})
     public ResponseEntity<ApiResponse<Article>> create(@RequestBody Article article) {
         try {
-            System.out.println("Received article: " + article);
+            logger.info("Create article request: title={}, source={}, linkUrl={}",
+                    article.getTitle(), article.getSource(), article.getLinkUrl());
             Article savedArticle = articleService.save(article);
             return ResponseEntity.ok(ApiResponse.success(savedArticle));
         } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.ok(ApiResponse.error("保存失败: " + e.getMessage()));
+            logger.error("Create article failed", e);
+            return ResponseEntity.internalServerError()
+                    .body(ApiResponse.error("保存失败: " + e.getMessage()));
         }
     }
 }
-
-

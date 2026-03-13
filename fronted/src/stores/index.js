@@ -1,31 +1,5 @@
 import { defineStore } from 'pinia'
 
-function isPlainObject(value) {
-  return Object.prototype.toString.call(value) === '[object Object]'
-}
-
-function isRequestSuccess(body) {
-  if (!isPlainObject(body)) return true
-
-  if (typeof body.success === 'boolean') {
-    return body.success
-  }
-
-  if (Object.prototype.hasOwnProperty.call(body, 'code')) {
-    const code = Number(body.code)
-    return code === 0 || code === 200
-  }
-
-  return true
-}
-
-function getResponseMessage(body, fallback) {
-  if (isPlainObject(body) && typeof body.message === 'string' && body.message.trim()) {
-    return body.message
-  }
-  return fallback
-}
-
 // 定义应用全局状态
 export const useAppStore = defineStore('app', {
   state: () => ({
@@ -136,20 +110,9 @@ export const useAuthStore = defineStore('auth', {
         username: payload.username,
         password: payload.password
       })
-
-      const body = resp.data
-      if (!isRequestSuccess(body)) {
-        return { success: false, message: getResponseMessage(body, '\u767B\u5F55\u5931\u8D25') }
-      }
-
-      const data = body?.data || {}
-      const token = data.accessToken || data.token || ''
-      if (!token) {
-        return { success: false, message: getResponseMessage(body, '\u767B\u5F55\u5931\u8D25\uFF0C\u8BF7\u7A0D\u540E\u91CD\u8BD5') }
-      }
-
-      this.accessToken = token
-      this.isLoggedIn = true
+      const data = resp.data?.data || {}
+      this.accessToken = data.accessToken || ''
+      this.isLoggedIn = !!this.accessToken
       if (data.user) {
         this.user = {
           ...this.user,
@@ -162,25 +125,20 @@ export const useAuthStore = defineStore('auth', {
         }
       }
       this.persist()
-      return { success: true, message: getResponseMessage(body, '\u767B\u5F55\u6210\u529F') }
+      // 立即返回当前状态，避免外层判断异常
+      return { success: this.isLoggedIn }
     },
 
     async register(payload) {
       const { default: http } = await import('../utils/http')
-      const resp = await http.post('/auth/register', {
+      await http.post('/auth/register', {
         username: payload.username,
         password: payload.password,
         nickname: payload.nickname || payload.username,
         studentId: payload.studentId,
         college: payload.college
       })
-
-      const body = resp.data
-      if (!isRequestSuccess(body)) {
-        return { success: false, message: getResponseMessage(body, '\u6CE8\u518C\u5931\u8D25') }
-      }
-
-      return { success: true, message: getResponseMessage(body, '\u6CE8\u518C\u6210\u529F') }
+      return { success: true }
     },
 
     logout() {

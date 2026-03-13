@@ -1,26 +1,46 @@
 package com.example.backend.exception;
 
-import java.util.Map;
-import java.util.stream.Collectors;
-
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.ConstraintViolationException;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<?> handleBusiness(BusinessException ex, HttpServletRequest request) {
+        int code = ex.getCode() > 0 ? ex.getCode() : 400;
+        HttpStatus status = HttpStatus.resolve(code);
+        if (status == null) {
+            status = HttpStatus.BAD_REQUEST;
+        }
+
+        String path = request != null ? request.getRequestURI() : "N/A";
+        if (status.is5xxServerError()) {
+            logger.error("Business exception: path={}, code={}, message={}", path, code, ex.getMessage(), ex);
+        } else {
+            logger.warn("Business exception: path={}, code={}, message={}", path, code, ex.getMessage());
+        }
+
+        return ResponseEntity.status(status)
+                .body(Map.of("code", code, "message", ex.getMessage()));
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handleValid(MethodArgumentNotValidException ex) {
@@ -28,17 +48,16 @@ public class GlobalExceptionHandler {
                 .map(e -> e.getDefaultMessage())
                 .collect(Collectors.joining("; "));
         if (msg.isEmpty()) {
-            msg = "参数验证失败";
+            msg = "参数校验失败";
         }
-        logger.warn("参数验证失败: {}", msg);
+        logger.warn("参数校验失败: {}", msg);
         return ResponseEntity.badRequest().body(Map.of("code", 400, "message", msg));
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<?> handleConstraint(ConstraintViolationException ex) {
-        String msg = "参数约束验证失败";
-        logger.warn("约束验证失败: {}", ex.getMessage());
-        return ResponseEntity.badRequest().body(Map.of("code", 400, "message", msg));
+        logger.warn("约束校验失败: {}", ex.getMessage());
+        return ResponseEntity.badRequest().body(Map.of("code", 400, "message", "参数约束校验失败"));
     }
 
     @ExceptionHandler(BadCredentialsException.class)
@@ -62,20 +81,33 @@ public class GlobalExceptionHandler {
                 .body(Map.of("code", 400, "message", "请求参数错误"));
     }
 
-    /**
-     * 未映射的请求（如浏览器请求 /favicon.ico、错误 URL）。
-     * 对 favicon.ico / robots.txt 等仅打 DEBUG，避免刷 ERROR 日志。
-     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<?> handleNoResourceFound(NoResourceFoundException ex, HttpServletRequest request) {
+        String path = request != null ? request.getRequestURI() : ex.getResourcePath();
+        logger.warn("Static resource not found: method={}, path={}",
+                request != null ? request.getMethod() : "N/A", path);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("code", 404, "message", "Resource not found"));
+    }
     @ExceptionHandler(NoHandlerFoundException.class)
     public ResponseEntity<?> handleNoHandlerFound(NoHandlerFoundException ex, HttpServletRequest request) {
         String path = request.getRequestURI();
         if (path != null && (path.endsWith("favicon.ico") || path.endsWith("robots.txt"))) {
-            logger.debug("未映射的请求（可忽略）: {}", path);
+            logger.debug("未映射请求（可忽略）: {}", path);
         } else {
-            logger.warn("未映射的请求: {} {}", request.getMethod(), path);
+            logger.warn("未映射请求: {} {}", request.getMethod(), path);
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Map.of("code", 404, "message", "接口不存在"));
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<?> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex, HttpServletRequest request) {
+        String path = request != null ? request.getRequestURI() : "N/A";
+        logger.warn("Method not supported: method={}, path={}, supported={}",
+                ex.getMethod(), path, ex.getSupportedHttpMethods());
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+                .body(Map.of("code", 405, "message", "请求方法不被支持"));
     }
 
     @ExceptionHandler(RuntimeException.class)
@@ -93,5 +125,3 @@ public class GlobalExceptionHandler {
                 .body(Map.of("code", 500, "message", "服务器内部错误"));
     }
 }
-
-

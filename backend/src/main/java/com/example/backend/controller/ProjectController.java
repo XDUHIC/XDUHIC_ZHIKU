@@ -8,8 +8,11 @@ import com.example.backend.service.ProjectService;
 import com.example.backend.service.UserLikeService;
 import com.example.backend.service.UserFavoriteService;
 import com.example.backend.service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -31,6 +34,8 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/projects")
 public class ProjectController {
+
+    private static final Logger logger = LoggerFactory.getLogger(ProjectController.class);
 
     @Autowired
     private ProjectService projectService;
@@ -124,7 +129,7 @@ public class ProjectController {
     /**
      * 创建项目
      */
-    @PostMapping
+    @PostMapping({"", "/"})
     public ResponseEntity<ApiResponse<Project>> createProject(
             @RequestParam("title") String title,
             @RequestParam("description") String description,
@@ -132,40 +137,65 @@ public class ProjectController {
             @RequestParam(value = "githubUrl", required = false) String githubUrl,
             @RequestParam(value = "documentFile", required = false) MultipartFile documentFile,
             Authentication authentication) {
-        
+
+        if (authentication == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error(401, "Please login first"));
+        }
+
+        String username = authentication.getName();
+        User user = userService.getByUsername(username);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error(401, "User not found"));
+        }
+
         try {
             Project project = new Project();
             project.setTitle(title);
             project.setDescription(description);
-            project.setCategory(category);
+            project.setCategory(normalizeCategory(category));
             project.setGithubUrl(githubUrl);
-            project.setViewCount(0); // 初始化浏览量
-            project.setStarCount(0); // 初始化收藏量
-            project.setCreatedAt(LocalDateTime.now()); // 设置创建时间
-            
-            // 设置作者信息
-            if (authentication != null) {
-                String username = authentication.getName();
-                User user = userService.getByUsername(username);
-                if (user != null) {
-                    project.setAuthorId(user.getId());
-                }
-            }
-            
-            // 处理文档文件上传
+            project.setViewCount(0);
+            project.setStarCount(0);
+            project.setCreatedAt(LocalDateTime.now());
+            project.setAuthorId(user.getId());
+
             if (documentFile != null && !documentFile.isEmpty()) {
                 String documentUrl = uploadDocument(documentFile);
                 project.setDetailedDescription(documentUrl);
             }
-            
+
             Project createdProject = projectService.createProject(project);
+            logger.info("Project created: id={}, title={}, category={}, authorId={}",
+                    createdProject.getId(), createdProject.getTitle(), createdProject.getCategory(), createdProject.getAuthorId());
             return ResponseEntity.ok(ApiResponse.success(createdProject));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.ok(ApiResponse.error("项目创建失败: " + e.getMessage()));
+        } catch (IllegalArgumentException ex) {
+            logger.warn("Create project validation failed: title={}, category={}, reason={}",
+                    title, category, ex.getMessage());
+            return ResponseEntity.badRequest().body(ApiResponse.error(400, ex.getMessage()));
+        } catch (Exception ex) {
+            logger.error("Create project failed: title={}, category={}, username={}", title, category, username, ex);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error(500, "Create project failed: " + ex.getMessage()));
         }
     }
-    
+
+    private String normalizeCategory(String rawCategory) {
+        if (rawCategory == null) {
+            return "others";
+        }
+        String category = rawCategory.trim().toLowerCase();
+        switch (category) {
+            case "embedded":
+                return "embed";
+            case "other":
+                return "others";
+            default:
+                return category;
+        }
+    }
+
     /**
      * 上传文档文件
      */
@@ -232,7 +262,7 @@ public class ProjectController {
             // 更新项目信息
             existingProject.setTitle(title);
             existingProject.setDescription(description);
-            existingProject.setCategory(category);
+            existingProject.setCategory(normalizeCategory(category));
             existingProject.setGithubUrl(githubUrl);
             
             // 处理文档文件上传
@@ -279,7 +309,7 @@ public class ProjectController {
             // 更新项目信息
             existingProject.setTitle(project.getTitle());
             existingProject.setDescription(project.getDescription());
-            existingProject.setCategory(project.getCategory());
+            existingProject.setCategory(normalizeCategory(project.getCategory()));
             existingProject.setGithubUrl(project.getGithubUrl());
             
             // 如果传入了detailedDescription，也更新它（用于移除文档）

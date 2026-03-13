@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <MainLayout>
     <div class="shares-page">
       <!-- 页面标题区 -->
@@ -151,6 +151,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 import MainLayout from '../layouts/MainLayout.vue'
 import { getShares } from '../api/shares'
 // 使用 new URL() 方式确保开发和构建环境都能正确处理
@@ -276,6 +277,33 @@ const getCategoryType = (category) => {
   return typeMap[category] || 'info'
 }
 
+const extractShareList = (payload) => {
+  if (Array.isArray(payload)) {
+    return payload
+  }
+  if (!payload || typeof payload !== 'object') {
+    return []
+  }
+  const candidates = [payload.data, payload.records, payload.list]
+  const matched = candidates.find((item) => Array.isArray(item))
+  return matched || []
+}
+
+const getTotalCount = (payload, listLength) => {
+  if (!payload || typeof payload !== 'object') {
+    return listLength
+  }
+  return Number(payload.total ?? payload.count ?? listLength) || listLength
+}
+
+const getTotalPageCount = (payload, total, size) => {
+  const fallback = Math.max(1, Math.ceil((total || 0) / size))
+  if (!payload || typeof payload !== 'object') {
+    return fallback
+  }
+  return Number(payload.totalPages ?? payload.pages ?? fallback) || fallback
+}
+
 // API调用函数
 const fetchShares = async () => {
   loading.value = true
@@ -287,31 +315,36 @@ const fetchShares = async () => {
     }
 
     const response = await getShares(params)
+    const body = response?.data || {}
+    const isSuccess = body.success === true || body.code === 0
 
-    if (response.data && response.data.success) {
-      const pageData = response.data.data || {}
-      const list = pageData.data || []
-
-      // 数据转换
-      const normalizedShares = list.map(item => ({
-        id: item.id,
-        title: item.title,
-        summary: item.content || '暂无摘要',
-        category: item.category, // 保留原始分类值用于样式
-        categoryLabel: getCategoryLabel(item.category), // 转换为中文显示
-        date: item.createdAt,
-        views: item.viewCount || 0
-      }))
-
-      shares.value = normalizedShares
-      totalShares.value = pageData.total || 0
-      totalPages.value = pageData.totalPages || 0
+    if (!isSuccess) {
+      throw new Error(body.message || '获取经验分享失败')
     }
+
+    const payload = body.data ?? {}
+    const list = extractShareList(payload)
+
+    // 数据转换
+    const normalizedShares = list.map(item => ({
+      id: item.id,
+      title: item.title,
+      summary: item.content || '暂无摘要',
+      category: item.category, // 保留原始分类值用于样式
+      categoryLabel: getCategoryLabel(item.category), // 转换为中文显示
+      date: item.createdAt,
+      views: item.viewCount || 0
+    }))
+
+    shares.value = normalizedShares
+    totalShares.value = getTotalCount(payload, normalizedShares.length)
+    totalPages.value = getTotalPageCount(payload, totalShares.value, pageSize.value)
   } catch (error) {
     console.error('获取经验分享失败:', error)
     shares.value = []
     totalShares.value = 0
     totalPages.value = 0
+    ElMessage.error(error?.message || '获取经验分享失败，请稍后重试')
   } finally {
     loading.value = false
   }
@@ -775,3 +808,4 @@ onMounted(() => {
   }
 }
 </style>
+

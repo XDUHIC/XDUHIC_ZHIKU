@@ -1,9 +1,9 @@
-<template>
+﻿<template>
   <MainLayout>
     <div class="share-detail-page">
       <div class="page-header">
         <div class="header-cartoon header-cartoon--left">
-          <img src="/src/assets/cartoon1.jpg" alt="cartoon decoration" />
+          <img :src="cartoon1" alt="cartoon decoration" />
         </div>
         <div class="header-content">
           <h1 class="page-title">{{ detail.title || '经验分享详情' }}</h1>
@@ -22,7 +22,7 @@
           </div>
         </div>
         <div class="header-cartoon header-cartoon--right">
-          <img src="/src/assets/cartoon2.png" alt="cartoon decoration"/>
+          <img :src="cartoon2" alt="cartoon decoration"/>
         </div>
       </div>
 
@@ -43,11 +43,10 @@
 <script setup>
 import {ref, onMounted} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
-import {ElMessage} from 'element-plus'
 import MainLayout from '../layouts/MainLayout.vue'
 import {marked} from 'marked'
 import DOMPurify from 'dompurify'
-import axios from 'axios'
+import { getShareDetail } from '../api/shares'
 import {config} from '../utils/config.js'
 // 正确导入图片资源
 import cartoon1 from '../assets/cartoon1.jpg'
@@ -76,6 +75,7 @@ const toAbsoluteWithBase = (maybeRelative, base) => {
   if (/^(data:|mailto:|tel:|#)/i.test(maybeRelative)) return maybeRelative
   // 已是绝对 URL
   if (/^https?:\/\//i.test(maybeRelative)) return maybeRelative
+  if (maybeRelative.startsWith('/')) return maybeRelative
   
   // 如果base存在且不是绝对URL，尝试拼接
   if (base && !base.startsWith('http')) {
@@ -256,6 +256,19 @@ const loadMarkdownAndRender = async (mdTextOrUrl) => {
   }
 }
 
+const normalizeShareResponse = (body) => {
+  if (!body || typeof body !== 'object') {
+    return {}
+  }
+
+  const isSuccess = body.success === true || body.code === 0 || body.code === 200
+  if (!isSuccess) {
+    throw new Error(body.message || '获取分享详情失败')
+  }
+
+  return body.data ?? body
+}
+
 const fetchDetail = async () => {
   loading.value = true
   try {
@@ -265,41 +278,18 @@ const fetchDetail = async () => {
     if (isStatic) {
       detail.value = {
         title: `${route.query.author || '优秀校友'}的经验分享`,
-        category: 'learn', 
-        createdAt: new Date().toISOString(), 
-        viewCount: null 
+        category: 'learn',
+        createdAt: new Date().toISOString(),
+        viewCount: null
       }
-      
-      const staticMdUrl = `/uploads/shares/contents/${id}.md`
-      
-      await loadMarkdownAndRender(staticMdUrl)
-      
+      await loadMarkdownAndRender(`/uploads/shares/contents/${id}.md`)
     } else {
-      const timestamp = Date.now()
-      const { data } = await axios.get(`/api/senior-shares/${id}?_t=${timestamp}&_cache=no`, {
-        headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0'
-        }
-      })
-      
-      const share = data?.data || data || {}
-      detail.value = share
-      
-      if (share.textUrl && (share.textUrl.startsWith('http://') || share.textUrl.startsWith('https://'))) {
-        window.open(share.textUrl, '_blank')
-        setTimeout(() => {
-          router.push('/share')
-        }, 500)
-        return
-      }
+      const response = await getShareDetail(id)
+      const share = normalizeShareResponse(response?.data)
+      detail.value = share || {}
 
-      if (share.textUrl) {
-        await loadMarkdownAndRender(share.textUrl)
-      } else {
-        htmlContent.value = ''
-      }
+      const contentUrl = share?.textUrl || `/uploads/shares/contents/${id}.md`
+      await loadMarkdownAndRender(contentUrl)
     }
   } catch (e) {
     console.error('获取分享详情失败:', e)
@@ -309,7 +299,6 @@ const fetchDetail = async () => {
     loading.value = false
   }
 }
-
 const formatDate = (dateStr) => {
   if (!dateStr) return ''
   const d = new Date(dateStr)
@@ -813,3 +802,8 @@ onMounted(() => {
   }
 }
 </style>
+
+
+
+
+
