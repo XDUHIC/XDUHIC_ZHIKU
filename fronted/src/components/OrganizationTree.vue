@@ -48,7 +48,7 @@
 <script>
 import TreeNode from './TreeNode.vue'
 import NodeDetail from './NodeDetail.vue'
-import organizationData from '@/data/organization.json'
+import axios from 'axios'
 
 export default {
   name: 'OrganizationTree',
@@ -58,9 +58,9 @@ export default {
   },
   data() {
     return {
-      companyName: organizationData.company,
-      lastUpdated: organizationData.lastUpdated,
-      organizationData: organizationData.organization,
+      companyName: '',
+      lastUpdated: '',
+      organizationData: null,
       searchKeyword: '',
       searchMatches: new Set(), // 存储匹配节点的ID
       selectedNode: null,
@@ -68,8 +68,7 @@ export default {
     }
   },
   created() {
-    // 这行代码没有实际作用，只是为了告诉 ESLint “expandedState 被使用了”
-    console.log('展开状态Map已初始化:', this.expandedState);
+    this.fetchOrganization()
   },
   computed: {
     searchResultsCount() {
@@ -77,6 +76,22 @@ export default {
     }
   },
   methods: {
+
+    async fetchOrganization() {
+      try {
+        const response = await axios.get('/api/organization')
+        // 假设返回的数据结构是 { company, lastUpdated, organization }
+        // 根据你的后端返回结构调整
+        const data = response.data
+        this.companyName = data.company
+        this.lastUpdated = data.lastUpdated
+        this.organizationData = data.organization
+      } catch (error) {
+        console.error('获取组织架构数据失败:', error)
+        // 可以显示错误信息给用户
+      }
+    },
+
     // 处理节点点击事件
     handleNodeClick(node) {
       this.selectedNode = node
