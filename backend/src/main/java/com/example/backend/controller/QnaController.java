@@ -32,7 +32,7 @@ public class QnaController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String tags) {
-        PageResponse<QnaQuestion> pr = qnaService.listQuestions(page, size, search, tags);
+        PageResponse<QnaQuestion> pr = qnaService.listQuestions(page, size, search, tags, null, null);
         return ResponseEntity.ok(ApiResponse.success(pr));
     }
 
@@ -63,10 +63,53 @@ public class QnaController {
             return ResponseEntity.badRequest().body(Map.of("code", 400, "message", "标题不能为空"));
         }
         try {
-            QnaQuestion created = qnaService.createQuestion(u.getId(), title, content, tags);
+            QnaQuestion created = qnaService.createQuestion(u.getId(), title, content, tags, null, null);
             return ResponseEntity.ok(ApiResponse.success(created));
         } catch (Exception e) {
             return ResponseEntity.ok(ApiResponse.error("发布问题失败: " + e.getMessage()));
+        }
+    }
+
+    @GetMapping("/targets/{targetType}/{targetId}/questions")
+    public ResponseEntity<ApiResponse<PageResponse<QnaQuestion>>> listTargetQuestions(
+            @PathVariable String targetType,
+            @PathVariable Long targetId,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String tags) {
+        PageResponse<QnaQuestion> pr = qnaService.listQuestions(page, size, search, tags, targetType, targetId);
+        return ResponseEntity.ok(ApiResponse.success(pr));
+    }
+
+    @PostMapping("/targets/{targetType}/{targetId}/questions")
+    public ResponseEntity<?> createTargetQuestion(
+            @PathVariable String targetType,
+            @PathVariable Long targetId,
+            @RequestBody Map<String, Object> body,
+            Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(401).body(Map.of("code", 401, "message", "请先登录"));
+        }
+        User u = userService.getByUsername(authentication.getName());
+        if (u == null) {
+            return ResponseEntity.status(401).body(Map.of("code", 401, "message", "用户不存在"));
+        }
+        String content = body != null && body.get("content") != null ? body.get("content").toString() : "";
+        String title = body != null && body.get("title") != null ? body.get("title").toString() : "";
+        String tags = body != null && body.get("tags") != null ? body.get("tags").toString() : null;
+        if (content.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("code", 400, "message", "内容不能为空"));
+        }
+        if (title.isBlank()) {
+            String trimmed = content.trim();
+            title = trimmed.length() > 24 ? trimmed.substring(0, 24) + "..." : trimmed;
+        }
+        try {
+            QnaQuestion created = qnaService.createQuestion(u.getId(), title, content, tags, targetType, targetId);
+            return ResponseEntity.ok(ApiResponse.success(created));
+        } catch (Exception e) {
+            return ResponseEntity.ok(ApiResponse.error("发布讨论失败: " + e.getMessage()));
         }
     }
 

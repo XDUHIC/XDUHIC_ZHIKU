@@ -41,12 +41,12 @@ public class QnaServiceImpl implements QnaService {
     }
 
     @Override
-    public PageResponse<QnaQuestion> listQuestions(int page, int size, String search, String tags) {
+    public PageResponse<QnaQuestion> listQuestions(int page, int size, String search, String tags, String targetType, Long targetId) {
         if (page < 1) page = 1;
         if (size < 1) size = 10;
         int offset = (page - 1) * size;
-        List<QnaQuestion> data = questionMapper.list(offset, size, search, tags);
-        long total = questionMapper.count(search, tags);
+        List<QnaQuestion> data = questionMapper.list(offset, size, search, tags, targetType, targetId);
+        long total = questionMapper.count(search, tags, targetType, targetId);
         return new PageResponse<>(data, total, page, size);
     }
 
@@ -58,7 +58,8 @@ public class QnaServiceImpl implements QnaService {
 
     @Override
     @Transactional
-    public QnaQuestion createQuestion(Long userId, String title, String content, String tags) {
+    public QnaQuestion createQuestion (Long userId, String title, String content, String tags, String
+    targetType, Long targetId){
         QnaQuestion q = new QnaQuestion();
         q.setUserId(userId);
         q.setTitle(title);
@@ -67,9 +68,12 @@ public class QnaServiceImpl implements QnaService {
         q.setViewCount(0);
         q.setAnswerCount(0);
         q.setCreatedAt(LocalDateTime.now());
+        q.setTargetType(targetType);
+        q.setTargetId(targetId);
         questionMapper.insert(q);
         return questionMapper.getById(q.getId());
     }
+
 
     @Override
     public PageResponse<QnaAnswer> listAnswers(Long questionId, int page, int size) {

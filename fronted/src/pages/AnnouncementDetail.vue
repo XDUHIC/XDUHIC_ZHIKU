@@ -581,16 +581,16 @@ onMounted(() => {
 
   blockquote {
     border-left: 4px solid #ddd;
-    background: #f9f9f9;
-    padding: 1em 1.5em;
-    margin: 1.5em 0;
-    border-radius: 0 4px 4px 0;
+    background: #f8f6fc;
+    padding: 1%;
+    margin: 1% 0;
+    border-radius: 13px;
     font-style: italic;
     color: #666;
   }
 
   code {
-    background: #f1f3f4;
+    background: #fffaf4;
     padding: 0.2em 0.4em;
     border-radius: 3px;
     font-family: $font-family-mono; // 使用字体族变量替代硬编码值
@@ -599,12 +599,12 @@ onMounted(() => {
   }
 
   pre {
-    background: #f6f8fa;
-    border: 1px solid #e1e4e8;
-    border-radius: 6px;
-    padding: 1.2em;
+    background: #fcf5ed;
+    border: 1px solid #ccccd2;
+    border-radius: 13px;
+    padding: 1%;
     overflow-x: auto;
-    margin: 1.5em 0;
+    margin: 1% 0;
 
     code {
       background: none;
@@ -625,10 +625,11 @@ onMounted(() => {
 
   table {
     width: 100%;
-    border-collapse: collapse;
     margin: 1.5em 0;
-    border: 1px solid #e1e4e8;
-    border-radius: 6px;
+    border: 2px solid #e1e4e8;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 13px;
     overflow: hidden;
 
     th, td {

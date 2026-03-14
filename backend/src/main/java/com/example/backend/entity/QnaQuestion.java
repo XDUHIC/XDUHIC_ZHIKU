@@ -18,4 +18,6 @@ public class QnaQuestion {
     private Long acceptedAnswerId;
     private LocalDateTime createdAt;
     private String authorName;
+    private String targetType; // share/project/...
+    private Long targetId;
 }

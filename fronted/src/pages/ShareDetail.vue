@@ -26,22 +26,91 @@
         </div>
       </div>
 
-      <div class="content-container" v-if="!loading">
-        <div class="document-content">
-          <div v-if="htmlContent" class="markdown-content" v-html="htmlContent"></div>
-          <div v-else class="empty">暂未找到分享内容</div>
-        </div>
-      </div>
-      <div v-else class="loading">
+      <div v-if="loading" class="loading">
         <div class="spinner"></div>
         加载中...
       </div>
+
+      <template v-else>
+        <div class="content-container">
+          <div class="document-content">
+            <div v-if="htmlContent" class="markdown-content" v-html="htmlContent"></div>
+            <div v-else class="empty">暂未找到分享内容</div>
+          </div>
+        </div>
+
+        <section class="discussion-section" v-if="!isStaticDetail">
+          <h3>讨论区</h3>
+          <!--复用答疑模块-->
+          <p class="discussion-tip">围绕本篇分享提问与交流~</p>
+
+          <div class="discussion-input">
+            <el-input
+                v-model="newDiscussionContent"
+                type="textarea"
+                :rows="6"
+                placeholder="写下你的问题或想法..."
+            />
+            <el-button type="primary" :loading="postingDiscussion" @click="submitDiscussion">发布讨论</el-button>
+          </div>
+
+          <div v-if="discussionLoading" class="loading">讨论加载中...</div>
+          <div v-else-if="discussions.length === 0" class="empty">暂时还没有讨论，来发第一条吧～</div>
+          <div v-else class="discussion-list">
+            <article v-for="item in discussions" :key="item.id" class="discussion-item">
+
+              <div class="discussion-main">
+                <div class="avatar-wrapper">
+                  <el-avatar :size="40" :src="item.authorAvatar">
+                    {{ item.authorName ? item.authorName.charAt(0) : '匿' }}
+                  </el-avatar>
+                </div>
+
+                <div class="content-wrapper">
+                  <div class="discussion-author">{{ item.authorName || '匿名用户' }}</div>
+                  <div class="discussion-content">{{ item.content }}</div>
+                  <div class="discussion-meta">{{ formatDateTime(item.createdAt) }}</div>
+                </div>
+              </div>
+
+              <div class="answer-list" v-if="discussionAnswers[item.id]?.length">
+                <div v-for="(ans, index) in discussionAnswers[item.id]" :key="ans.id" class="answer-item">
+                  <el-avatar :size="24" :src="ans.authorAvatar" class="answer-avatar">
+                    {{ ans.authorName ? ans.authorName.charAt(0) : '匿' }}
+                  </el-avatar>
+
+                  <div class="answer-content">
+                    <div class="answer-header">
+                      <span class="answer-author">{{ ans.authorName || '匿名用户' }}</span>
+                      <span class="answer-time">{{ formatDateTime(ans.createdAt) }}</span>
+                    </div>
+                    <div class="answer-text">{{ ans.content }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="answer-input">
+                <el-input
+                    v-model="replyDraft[item.id]"
+                    type="textarea"
+                    :rows="4"
+                    placeholder="回复这条讨论..."
+                />
+                <el-button size="small" :loading="postingAnswerId === item.id" @click="submitAnswer(item.id)">回复</el-button>
+              </div>
+            </article>
+          </div>
+        </section>
+      </template>
+
     </div>
   </MainLayout>
 </template>
 
 <script setup>
 import {ref, onMounted} from 'vue'
+import {useAuthStore} from '../stores'
+import {createDiscussionAnswer, createShareDiscussion, getDiscussionAnswers, getShareDiscussions} from '../api/shares'
 import {useRoute, useRouter} from 'vue-router'
 import MainLayout from '../layouts/MainLayout.vue'
 import {marked} from 'marked'
@@ -57,6 +126,23 @@ const router = useRouter()
 const loading = ref(true)
 const detail = ref({})
 const htmlContent = ref('')
+const authStore = useAuthStore()
+const discussions = ref([])
+const discussionAnswers = ref({})
+const discussionLoading = ref(false)
+const newDiscussionContent = ref('')
+const postingDiscussion = ref(false)
+const postingAnswerId = ref(null)
+const replyDraft = ref({})
+const isStaticDetail = ref(false)
+
+const notify = (type, message) => {
+  if (typeof ElMessage !== 'undefined' && ElMessage && typeof ElMessage[type] === 'function') {
+    ElMessage[type](message)
+    return
+  }
+  console[type === 'error' ? 'error' : 'warn'](`[notify:${type}] ${message}`)
+}
 
 // 记录 Markdown 文档的基础路径（用于修正相对资源路径）
 let currentMdBaseUrl = ''
@@ -273,9 +359,9 @@ const fetchDetail = async () => {
   loading.value = true
   try {
     const id = route.params.id
-    const isStatic = route.query.isStatic === 'true'
+    isStaticDetail.value = route.query.isStatic === 'true'
 
-    if (isStatic) {
+    if (isStaticDetail.value) {
       detail.value = {
         title: `${route.query.author || '优秀校友'}的经验分享`,
         category: 'learn',
@@ -339,8 +425,81 @@ const goBack = () => {
   router.push('/share')
 }
 
-onMounted(() => {
-  fetchDetail()
+const loadDiscussions = async () => {
+  if (isStaticDetail.value) return
+  const shareId = route.params.id
+  discussionLoading.value = true
+  try {
+    const { data } = await getShareDiscussions(shareId, { page: 1, size: 20 })
+    const list = data?.data?.data || []
+    discussions.value = list
+
+    const answerMap = {}
+    await Promise.all(list.map(async (q) => {
+      const resp = await getDiscussionAnswers(q.id, { page: 1, size: 50 })
+      answerMap[q.id] = resp.data?.data?.data || []
+    }))
+    discussionAnswers.value = answerMap
+  } catch (e) {
+    console.error('加载讨论失败', e)
+  } finally {
+    discussionLoading.value = false
+  }
+}
+
+const submitDiscussion = async () => {
+  if (!authStore.isLoggedIn) {
+    notify('warning', '请先登录再发布讨论')
+    router.push('/auth/login')
+    return
+  }
+  const content = (newDiscussionContent.value || '').trim()
+  if (!content) {
+    notify('warning', '讨论内容不能为空')
+    return
+  }
+  postingDiscussion.value = true
+  try {
+    const title = content.length > 24 ? `${content.slice(0, 24)}...` : content
+    await createShareDiscussion(route.params.id, { title, content })
+    newDiscussionContent.value = ''
+    notify('success', '讨论发布成功')
+    await loadDiscussions()
+  } catch (e) {
+    notify('error', e.response?.data?.message || '讨论发布失败')
+  } finally {
+    postingDiscussion.value = false
+  }
+}
+
+const submitAnswer = async (questionId) => {
+  if (!authStore.isLoggedIn) {
+    notify('warning', '请先登录再回复')
+    router.push('/auth/login')
+    return
+  }
+  const content = (replyDraft.value[questionId] || '').trim()
+  if (!content) {
+    notify('warning', '回复内容不能为空')
+    return
+  }
+  postingAnswerId.value = questionId
+  try {
+    await createDiscussionAnswer(questionId, { content })
+    replyDraft.value[questionId] = ''
+    notify('success', '回复成功')
+    const resp = await getDiscussionAnswers(questionId, { page: 1, size: 50 })
+    discussionAnswers.value[questionId] = resp.data?.data?.data || []
+  } catch (e) {
+    notify('error', e.response?.data?.message || '回复失败')
+  } finally {
+    postingAnswerId.value = null
+  }
+}
+
+onMounted(async () => {
+  await fetchDetail()
+  await loadDiscussions()
 })
 </script>
 
@@ -705,10 +864,10 @@ onMounted(() => {
 
   blockquote {
     border-left: 4px solid #ddd;
-    background: #f9f9f9;
-    padding: 1em 1.5em;
-    margin: 1.5em 0;
-    border-radius: 0 4px 4px 0;
+    background: #f8f6fc;
+    padding: 1%;
+    margin: 1% 0;
+    border-radius: 13px;
     font-style: italic;
     color: #666;
   }
@@ -723,12 +882,12 @@ onMounted(() => {
   }
 
   pre {
-    background: #f6f8fa;
-    border: 1px solid #e1e4e8;
-    border-radius: 6px;
-    padding: 1.2em;
+    background: #fffaf4;
+    border: 1px solid #ccccd2;
+    border-radius: 13px;
+    padding: 1%;
     overflow-x: auto;
-    margin: 1.5em 0;
+    margin: 1% 0;
 
     code {
       background: none;
@@ -750,11 +909,12 @@ onMounted(() => {
 
   table {
     width: 100%;
-    border-collapse: collapse;
     margin: 1.5em 0;
-    border: 1px solid #e1e4e8;
-    border-radius: 6px;
+    border: 2px solid #e1e4e8;
+    border-radius: 13px;
     overflow: hidden;
+    border-collapse: separate;
+    border-spacing: 0;
 
     th, td {
       padding: 0.75em 1em;
@@ -800,6 +960,223 @@ onMounted(() => {
     border-top: 1px solid #e1e4e8;
     margin: 2em 0;
   }
+}
+
+.discussion-section {
+  margin-top: 24px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.discussion-tip {
+  color: #666;
+  margin-bottom: 12px;
+}
+
+.discussion-input, .answer-input {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.discussion-item {
+  border-top: 1px solid #eee;
+  padding: 12px 0;
+}
+
+.discussion-author, .answer-author {
+  font-weight: 600;
+}
+
+.discussion-meta {
+  color: #999;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.answer-list {
+  margin: 8px 0;
+  padding: 8px;
+  background: #fafafa;
+  border-radius: 8px;
+}
+
+.answer-item + .answer-item {
+  margin-top: 6px;
+}
+
+/* --- 讨论区头像与排版样式 --- */
+
+.discussion-item {
+  border-top: 1px solid #eee;
+  padding: 16px 0;
+}
+
+/* 主评论的 Flex 布局 */
+.discussion-main {
+  display: flex;
+  gap: 12px; /* 头像和文字的间距 */
+  align-items: flex-start; /* 顶部对齐 */
+}
+
+.avatar-wrapper {
+  flex-shrink: 0; /* 防止头像被挤压变形 */
+}
+
+.content-wrapper {
+  flex: 1; /* 让文字部分撑满剩余空间 */
+}
+
+.discussion-author {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.discussion-content {
+  color: #333;
+  line-height: 1.5;
+  word-break: break-word; /* 防止长串英文或链接撑爆容器 */
+}
+
+.discussion-meta {
+  color: #999;
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+/* 楼中楼回复的样式 */
+.answer-list {
+  margin: 12px 0 12px 52px; /* 左侧留出主评论头像的宽度 (40px头像 + 12px间距) */
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.answer-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.answer-item + .answer-item {
+  margin-top: 10px;
+}
+
+.answer-avatar {
+  flex-shrink: 0;
+  margin-top: 2px; /* 微调小头像的垂直对齐 */
+}
+
+.answer-content {
+  flex: 1;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.answer-author {
+  font-weight: 600;
+  color: #4facfe; /* 给作者名字加一点主题色区分 */
+}
+
+/* 回复框向右缩进对齐 */
+.answer-input {
+  margin-left: 52px;
+}
+
+/* 子回复的头部布局（名字和时间水平排列） */
+.answer-header {
+  display: flex;
+  justify-content: space-between; /* 名字在左，时间在右 */
+  align-items: center;
+  margin-bottom: 2px;
+}
+
+.answer-author {
+  font-weight: 600;
+  color: #4facfe;
+  font-size: 13px; /* 子回复名字稍微小一点 */
+}
+
+/* 子回复的时间样式 */
+.answer-time {
+  color: #bbb; /* 颜色更淡一些 */
+  font-size: 11px; /* 字体更小一些 */
+}
+
+.answer-text {
+  color: #444;
+  line-height: 1.4;
+  font-size: 13px;
+}
+
+/* 调整子回复列表的内边距 */
+.answer-list {
+  margin: 12px 0 12px 52px;
+  padding: 10px 14px; /* 稍微加宽一点内边距 */
+  background: #f9f9f9;
+  border-radius: 8px;
+}
+
+/* 楼中楼整体容器 */
+.answer-list {
+  margin: 12px 0 12px 52px;
+  padding: 8px 16px;
+  background-color: #fcfcfc; /* 极浅的灰色背景 */
+  border-radius: 8px;
+  border: 1px solid $gray-color; /* 给整个回复块一个淡淡的边框 */
+}
+
+/* 每一条具体的回复 */
+.answer-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 0; /* 增加上下内边距 */
+  position: relative;
+
+  /* 除了最后一条，其余每一条下面都加一条很淡的分割线 */
+  &:not(:last-child) {
+    border-bottom: 1px dashed $gray-dark-color; /* 使用虚线 */
+  }
+}
+
+.answer-avatar {
+  flex-shrink: 0;
+  border: 1px solid #fff; /* 给小头像加白边，在浅灰背景下更突出 */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.answer-content {
+  flex: 1;
+}
+
+.answer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.answer-author {
+  font-weight: 600;
+  color: #555; /* 名字颜色稍微深一点 */
+  font-size: 13px;
+}
+
+.answer-time {
+  color: #999;
+  font-size: 11px;
+}
+
+.answer-text {
+  color: #444;
+  line-height: 1.6; /* 增加行高，提升阅读体验 */
+  font-size: 13px;
+  white-space: pre-wrap; /* 保持换行格式 */
 }
 </style>
 

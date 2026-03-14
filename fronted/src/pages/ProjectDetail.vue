@@ -58,7 +58,7 @@
 
       <!-- 项目内容 -->
       <div class="content-container" v-if="!loading">
-        <div v-if="htmlContent" class="markdown-body" v-html="htmlContent"></div>
+        <div v-if="htmlContent" class="markdown-content" v-html="htmlContent"></div>
         <div v-else class="empty">暂未找到项目文档内容</div>
       </div>
       
@@ -594,136 +594,152 @@ onMounted(() => {
   margin-top: 24px;
 }
 
-.markdown-body {
+// Markdown 内容样式
+:deep(.markdown-content) {
+  line-height: $line-height-relaxed; // 使用行高变量替代硬编码值 1.7
   color: #333;
-  line-height: $line-height-relaxed; // 使用行高变量替代硬编码值 1.8
-  font-size: 1rem;
-}
+  font-size: 16px;
+  font-family: $font-family-base; // 使用字体族变量替代硬编码值
 
-.markdown-body h1,
-.markdown-body h2,
-.markdown-body h3,
-.markdown-body h4,
-.markdown-body h5,
-.markdown-body h6 {
-  margin-top: 2rem;
-  margin-bottom: 1rem;
-  font-weight: bold;
-  color: #2c3e50;
-}
+  h1, h2, h3, h4, h5, h6 {
+    color: #2c3e50;
+    margin-top: 2em;
+    margin-bottom: 1em;
+    font-weight: 600;
+    font-family: $font-family-heading; // 使用字体族变量替代硬编码值
+  }
 
-.markdown-body h1 {
-  font-size: 2.5rem;
-  border-bottom: 3px solid #667eea;
-  padding-bottom: 0.5rem;
-}
+  h1 {
+    font-size: 2em;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 0.5em;
+    margin-top: 0;
+  }
 
-.markdown-body h2 {
-  font-size: 2rem;
-  border-bottom: 2px solid #667eea;
-  padding-bottom: 0.5rem;
-}
+  h2 {
+    font-size: 1.6em;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.3em;
+  }
 
-.markdown-body h3 {
-  font-size: 1.5rem;
-}
+  h3 {
+    font-size: 1.4em;
+  }
 
-.markdown-body h4 {
-  font-size: 1.25rem;
-}
+  h4 {
+    font-size: 1.2em;
+  }
 
-.markdown-body p {
-  margin-bottom: 1rem;
-  color: #555;
-}
+  h5, h6 {
+    font-size: 1em;
+  }
 
-.markdown-body ul,
-.markdown-body ol {
-  margin-bottom: 1rem;
-  padding-left: 2rem;
-}
+  p {
+    margin-bottom: 1.2em;
+    text-align: justify;
+    word-break: break-word;
+  }
 
-.markdown-body li {
-  margin-bottom: 0.5rem;
-  color: #555;
-}
+  blockquote {
+    border-left: 4px solid #ddd;
+    background: #f8f6fc;
+    padding: 1%;
+    margin: 1% 0;
+    border-radius: 13px;
+    font-style: italic;
+    color: #666;
+  }
 
-.markdown-body blockquote {
-  border-left: 4px solid #667eea;
-  padding-left: 1rem;
-  margin: 1rem 0;
-  background: #f8f9fa;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  color: #666;
-}
+  code {
+    background: #f1f3f4;
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    font-family: $font-family-mono; // 使用字体族变量替代硬编码值
+    font-size: 0.9em;
+    color: #d73a49;
+  }
 
-.markdown-body code {
-  background: #f1f3f4;
-  padding: 0.2rem 0.4rem;
-  border-radius: 0.25rem;
-  font-family: $font-family-mono; // 使用字体族变量替代硬编码值
-  color: #e83e8c;
-}
+  pre {
+    background: #fffaf4;
+    border: 1px solid #ccccd2;
+    border-radius: 13px;
+    padding: 1%;
+    overflow-x: auto;
+    margin: 1% 0;
 
-.markdown-body pre {
-  background: #f8f9fa;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  overflow-x: auto;
-  margin: 1rem 0;
-  border: 1px solid #e9ecef;
-}
+    code {
+      background: none;
+      padding: 0;
+      color: #24292e;
+      font-size: 0.85em;
+    }
+  }
 
-.markdown-body pre code {
-  background: none;
-  padding: 0;
-  color: #333;
-}
+  ul, ol {
+    padding-left: 2em;
+    margin-bottom: 1.2em;
 
-.markdown-body img {
-  max-width: 100%;
-  height: auto;
-  border-radius: 0.5rem;
-  margin: 1rem 0;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
+    li {
+      margin-bottom: 0.4em;
+    }
+  }
 
-.markdown-body table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 1rem 0;
-  border: 1px solid #e9ecef;
-  border-radius: 0.5rem;
-  overflow: hidden;
-}
+  table {
+    width: 100%;
+    margin: 1.5em 0;
+    border: 2px solid #e1e4e8;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 13px;
+    overflow: hidden;
 
-.markdown-body th,
-.markdown-body td {
-  padding: 0.75rem;
-  text-align: left;
-  border-bottom: 1px solid #e9ecef;
-}
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid #e1e4e8;
+    }
 
-.markdown-body th {
-  background: #667eea;
-  color: white;
-  font-weight: bold;
-}
+    th {
+      background: #f6f8fa;
+      font-weight: 600;
+      color: #24292e;
+    }
 
-.markdown-body tr:nth-child(even) {
-  background: #f8f9fa;
-}
+    tr:nth-child(even) {
+      background: #f6f8fa;
+    }
+  }
 
-.markdown-body a {
-  color: #667eea;
-  text-decoration: none;
-  border-bottom: 1px solid transparent;
-  transition: border-color 0.3s ease;
-}
+  img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+    margin: 1.5em 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
 
-.markdown-body a:hover {
-  border-bottom-color: #667eea;
+  a {
+    color: #0366d6;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid #e1e4e8;
+    margin: 2em 0;
+  }
+
+  strong {
+    font-weight: 600;
+  }
+
+  em {
+    font-style: italic;
+  }
 }
 
 .empty {
