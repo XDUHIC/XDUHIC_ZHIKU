@@ -1,11 +1,18 @@
 package com.example.backend.entity;
 
+
 import lombok.Data;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Data
+@Entity
+@Table(name = "users")   // 指定数据库表名，根据实际情况调整
 public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String username;
     private String password;
     private String nickname;
@@ -13,12 +20,20 @@ public class User {
     private String avatarUrl;
     private String college;
     private String bio;
+
+    @Column(name = "status")
     private Integer status; // 1 启用 0 禁用
+
+    @Column(name = "hic")
     private Integer hic; // HIC认证状态：0-未认证，1-已认证
+
+    @Column(name = "last_login_time")
     private LocalDateTime lastLoginTime;
+
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    // 手动添加 getter 和 setter 方法以确保兼容性
+    // 手动添加的 getter 和 setter（Lombok 已生成，但保留不影响）
     public Long getId() {
         return id;
     }
