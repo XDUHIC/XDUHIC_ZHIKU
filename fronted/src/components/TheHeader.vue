@@ -141,12 +141,14 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAppStore, useAuthStore } from '../stores'
+import { useAppStore, useAuthStore } from '../stores/index'
 import { config } from '../utils/config.js'
+import { storeToRefs } from 'pinia'
 
 const router = useRouter()
 const appStore = useAppStore()
 const authStore = useAuthStore()
+const { user } = storeToRefs(authStore)
 
 const isDark = ref(false)
 
@@ -190,20 +192,21 @@ const handleLogout = () => {
   router.push('/portal')
 }
 
-const navItems = [
-  { id: 1, title: '知识库', path: '/knowledge', icon: 'book' },
-  { id: 2, title: '项目分享', path: '/projects', icon: 'code'},
-  {id: 3, title: '华为竞赛', path: '/competitions', icon: 'trophy'},
-  {id: 4, title: '实用工具', path: '/tools', icon: 'toolbox'},
-  {id: 5, title: '华俱推文', path: '/articles', icon: 'newspaper'},
-  {id: 6, title: '师兄师姐说', path: '/share', icon: 'comment'},
-  {
-    id: 7, // id 保持唯一，顺序递增即可
-    title: '组织架构', // 导航栏显示的文字
-    path: '/organization', // 必须与你在路由文件中配置的 `path` 完全一致
-    icon: 'sitemap' // 建议图标，表示组织结构。如果不确定，可先用 'users' 或 'diagram-project'
+const navItems = computed(() => {
+  const items = [
+    {id: 1, title: '知识库', path: '/knowledge', icon: 'book'},
+    {id: 2, title: '项目分享', path: '/projects', icon: 'code'},
+    {id: 3, title: '华为竞赛', path: '/competitions', icon: 'trophy'},
+    {id: 4, title: '实用工具', path: '/tools', icon: 'toolbox'},
+    {id: 5, title: '华俱推文', path: '/articles', icon: 'newspaper'},
+    {id: 6, title: '师兄师姐说', path: '/share', icon: 'comment'}
+  ]
+  // 如果用户已通过 HIC 认证，添加组织架构链接
+  if (user.value?.hic === 1) {
+    items.push({id: 7, title: '组织架构', path: '/organization', icon: 'sitemap'})
   }
-]
+  return items
+})
 </script>
 
 <style lang="scss" scoped>

@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 
+
 // 定义应用全局状态
 export const useAppStore = defineStore('app', {
   state: () => ({
@@ -75,7 +76,19 @@ export const useAuthStore = defineStore('auth', {
       bio: '',
       avatarUrl: '',
       hic: 0
-    }
+    },
+
+    getters: {
+      // 是否已通过 HIC 认证
+      isHicVerified: (state) => {
+        return state.user.hic === 1
+      },
+      // 是否已登录（通过 token 和 isLoggedIn 双重判断）
+      isAuthenticated: (state) => {
+        return state.isLoggedIn && !!state.accessToken
+      }
+    },
+
   }),
 
   actions: {

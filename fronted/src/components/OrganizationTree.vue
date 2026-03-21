@@ -49,6 +49,7 @@
 import TreeNode from './TreeNode.vue'
 import NodeDetail from './NodeDetail.vue'
 import axios from 'axios'
+const realToken = ''   // 粘贴你从 Postman 获取的完整 token
 
 export default {
   name: 'OrganizationTree',
@@ -79,13 +80,19 @@ export default {
 
     async fetchOrganization() {
       try {
-        const response = await axios.get('/api/organization')
-        // 假设返回的数据结构是 { company, lastUpdated, organization }
-        // 根据你的后端返回结构调整
+        // 确保 realToken 已定义（先打印看看）
+        console.log('使用的 token:', realToken)
+
+        const response = await axios.get('/api/organization', {
+          headers: { Authorization: `Bearer ${realToken}` }
+        })
+        console.log('请求成功，响应数据:', response.data)
+
         const data = response.data
         this.companyName = data.company
         this.lastUpdated = data.lastUpdated
         this.organizationData = data.organization
+
       } catch (error) {
         console.error('获取组织架构数据失败:', error)
         // 可以显示错误信息给用户
